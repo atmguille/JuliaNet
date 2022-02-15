@@ -7,8 +7,7 @@ Capa:
 
 module Capa_pkg
 
-include("Neurona.jl")
-using .Neurona_pkg
+using ..Neurona_pkg
 
 export Capa
 
