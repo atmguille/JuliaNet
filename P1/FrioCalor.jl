@@ -23,6 +23,7 @@ function parse_commandline()
     return parse_args(s)
 end
 
+
 function crear_red_frio_calor()
     red = RedNeuronal_pkg.Crear()
 
@@ -61,6 +62,14 @@ function crear_red_frio_calor()
     return red, x1, x2
 end
 
+function avanzar_ciclo(red::RedNeuronal_pkg.RedNeuronal, x1::Neurona_pkg.Neurona, calor::Float64, x2::Neurona_pkg.Neurona, frio::Float64)
+    Neurona_pkg.Inicializar(x1, calor)
+    Neurona_pkg.Inicializar(x2, frio)
+    RedNeuronal_pkg.Disparar(red)
+    RedNeuronal_pkg.Inicializar(red)
+    RedNeuronal_pkg.Propagar(red)
+end
+
 
 function main()
 
@@ -69,6 +78,17 @@ function main()
     input_file = parsed_args["input_file"]
     output_file = parsed_args["output_file"]
 
+    """
+    if size(ARGS) != (2,)
+        println("Número incorrecto de argumentos. Debe ejecutar:")
+        println("julia FrioCalor.jl [input_file] [output_file]")
+        return 
+    end
+
+    input_file = ARGS[1]
+    output_file = ARGS[2]
+    """
+
     red, x1, x2 = crear_red_frio_calor()
 
     valores = Vector{Vector{String}}()
@@ -76,28 +96,15 @@ function main()
 
     for line in readlines(input_file)
         calor, frio = split(line, " ")
-        Neurona_pkg.Inicializar(x1, parse(Float64, calor))
-        Neurona_pkg.Inicializar(x2, parse(Float64, frio))
-        RedNeuronal_pkg.Disparar(red)
-        RedNeuronal_pkg.Inicializar(red)
-        RedNeuronal_pkg.Propagar(red)
-
+        avanzar_ciclo(red, x1, parse(Float64, calor), x2, parse(Float64, frio))
         push!(valores, [string(convert(Int64, neurona.valor_salida)) for capa in red.capas for neurona in capa.neuronas])
     end
 
     # TODO: Comentar
-    Neurona_pkg.Inicializar(x1, 0.0)
-    Neurona_pkg.Inicializar(x2, 0.0)
-    RedNeuronal_pkg.Disparar(red)
-    RedNeuronal_pkg.Inicializar(red)
-    RedNeuronal_pkg.Propagar(red)
+    avanzar_ciclo(red, x1, 0.0, x2, 0.0)
     push!(valores, [string(convert(Int64, neurona.valor_salida)) for capa in red.capas for neurona in capa.neuronas])
 
-    Neurona_pkg.Inicializar(x1, 0.0)
-    Neurona_pkg.Inicializar(x2, 0.0)
-    RedNeuronal_pkg.Disparar(red)
-    RedNeuronal_pkg.Inicializar(red)
-    RedNeuronal_pkg.Propagar(red)
+    avanzar_ciclo(red, x1, 0.0, x2, 0.0)
     push!(valores, [string(convert(Int64, neurona.valor_salida)) for capa in red.capas for neurona in capa.neuronas])
     
     writedlm(output_file, valores)
