@@ -41,13 +41,13 @@ function crear_perceptron(num_atributos::Int64, num_clases::Int64, umbral::Float
 
     capa_entrada = Capa_pkg.Crear()
 
-    sesgo = Neurona_pkg.Crear(1.0, Neurona_pkg.Sesgo)
-    Capa_pkg.Añadir(capa_entrada, sesgo)
-
     for i in 1:num_atributos
         x = Neurona_pkg.Crear(1.0, Neurona_pkg.Directa)
         Capa_pkg.Añadir(capa_entrada, x)
     end
+
+    sesgo = Neurona_pkg.Crear(1.0, Neurona_pkg.Sesgo)
+    Capa_pkg.Añadir(capa_entrada, sesgo)
     
     RedNeuronal_pkg.Añadir(red, capa_entrada)
 
@@ -72,7 +72,7 @@ end
 function avanzar_ciclo(red::RedNeuronal_pkg.RedNeuronal, valores_entrada::Vector{Float64})
     capa_entrada = red.capas[1]
     for i in 1:size(valores_entrada, 1)
-        Neurona_pkg.Inicializar(capa_entrada.neuronas[i+1], valores_entrada[i])
+        Neurona_pkg.Inicializar(capa_entrada.neuronas[i], valores_entrada[i])
     end
     RedNeuronal_pkg.Disparar(red)
     RedNeuronal_pkg.Inicializar(red)
@@ -80,19 +80,22 @@ function avanzar_ciclo(red::RedNeuronal_pkg.RedNeuronal, valores_entrada::Vector
 end
 
 
-function entrenamiento_perceptron(red::RedNeuronal_pkg.RedNeuronal, tasa_aprendizaje::Float64, num_atributos::Int64, atributos::Vector{Float64}, num_clases::Int64, clases_verdaderas::Vector{Float64})
+function entrenamiento_perceptron(red::RedNeuronal_pkg.RedNeuronal, tasa_aprendizaje::Float64,
+    num_atributos::Int64, atributos::Vector{Float64}, num_clases::Int64, clases_verdaderas::Vector{Float64})
     capa_entrada = red.capas[1]
     capa_salida = red.capas[2]
+    # Los valores de salida de la última capa deben ser actualizados para obtener la respuesta final
+    Capa_pkg.Disparar(capa_salida)
 
     fin_entrenamiento = true
 
     for clase_index in 1:num_clases
-        if clases_verdaderas[clase_index] != capa_salida.neuronas[clase_index]
+        if clases_verdaderas[clase_index] != capa_salida.neuronas[clase_index].valor_salida
             fin_entrenamiento = false
             for atributo_index in 1:num_atributos
                 conexion = capa_entrada.neuronas[atributo_index].conexiones[clase_index]
                 conexion.peso_anterior = conexion.peso
-                conexion.peso = conexion.peso + tasa_aprendizaje * clases_verdaderas[clase_index] * atributos[atributo_index]
+                conexion.peso += tasa_aprendizaje * clases_verdaderas[clase_index] * atributos[atributo_index]
             end
         end
     end
@@ -141,14 +144,18 @@ function main()
     perceptron = crear_perceptron(num_atributos, num_clases, umbral)
 
     fin_entrenamiento = true
-
     for _ in 1:max_epocas
+        # Reset flag
+        fin_entrenamiento = true
         for line in file_lines[2:size(file_lines,1)]
-            valores = map((x) -> parse(Float64, x), split(line, "  "))
+            valores = map((x) -> parse(Float64, x), split(line, "  "))  # TODO: fix double spaces
+
             avanzar_ciclo(perceptron, valores[1:num_atributos])
-            atributos = [[1]; valores[1:num_atributos]]
+
+            atributos = [valores[1:num_atributos]; [1]]
             clases = valores[num_atributos+1:size(valores,1)]
-            fin_entrenamiento = fin_entrenamiento && entrenamiento_perceptron(perceptron, tasa_aprendizaje, num_atributos+1, atributos, num_clases, clases)
+            fin_entrenamiento = fin_entrenamiento & entrenamiento_perceptron(perceptron, tasa_aprendizaje, num_atributos+1, atributos, num_clases, clases)
+
             print_pesos(perceptron)
         end
 
@@ -156,6 +163,7 @@ function main()
             println("Entrenamiento finalizado por convergencia en los pesos.")
             break
         end
+
     end
 
     if !fin_entrenamiento
