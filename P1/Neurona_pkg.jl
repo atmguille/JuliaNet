@@ -43,6 +43,7 @@ export Neurona
     Sesgo
     McCulloch
     Perceptron
+    Adaline
 end
 
 
@@ -94,6 +95,12 @@ function Disparar(neurona::Neurona)
             neurona.valor_salida = -1.0
         else
             neurona.valor_salida = 0.0
+        end
+    elseif neurona.tipo == Adaline
+        if neurona.valor_entrada >= 0
+            neurona.valor_salida = 1.0
+        else
+            neurona.valor_salida = -1.0
         end
     end
 end
