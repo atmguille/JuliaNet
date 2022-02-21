@@ -42,6 +42,7 @@ export Neurona
     Directa
     Sesgo
     McCulloch
+    Perceptron
 end
 
 
@@ -86,6 +87,14 @@ function Disparar(neurona::Neurona)
         neurona.valor_salida = 1.0
     elseif neurona.tipo == McCulloch
         neurona.valor_salida = neurona.valor_entrada >= neurona.umbral ? 1.0 : 0.0
+    elseif neurona.tipo == Perceptron
+        if neurona.valor_entrada > neurona.umbral
+            neurona.valor_salida = 1.0
+        elseif neurona.valor_entrada < -1*neurona.umbral
+            neurona.valor_salida = -1.0
+        else
+            neurona.valor_salida = 0.0
+        end
     end
 end
 
