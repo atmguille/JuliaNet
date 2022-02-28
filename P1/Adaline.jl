@@ -5,6 +5,8 @@ using .Neurona_pkg
 using .Capa_pkg
 using .RedNeuronal_pkg
 
+include("lectura_de_datos.jl")
+
 using ArgParse  # import Pkg; Pkg.add("ArgParse")
 using DelimitedFiles
 
@@ -30,6 +32,15 @@ function parse_commandline()
             help = "Si el mayor cambio de pesos es menor que esta tolerancia, el entrenamiento finaliza."
             arg_type = Float64
             required = true
+        "--modo"
+            help = "Modo de funcionamiento para la lectura de datos."
+            arg_type = Int64
+            required = true
+        "--porcentaje"
+            help = "Porcentaje de datos del fichero utilizados en el entrenamiento. Exclusivo del modo 2."
+            arg_type = Float64
+        "--input_test_file"
+            help = "Fichero con los valores de entrada para probar la red. Exclusivo del modo 3."
     end
 
     return parse_args(s)
@@ -137,37 +148,40 @@ function main()
     tasa_aprendizaje = parsed_args["tasa_aprendizaje"]
     max_epocas = parsed_args["max_epocas"]
     tolerancia = parsed_args["tolerancia"]
+    modo = parsed_args["modo"]
 
-    """
-    if size(ARGS) != (2,)
-        println("Número incorrecto de argumentos. Debe ejecutar:")
-        println("julia FrioCalor.jl [input_file] [output_file]")
-        return 
+    if modo == 1
+        por = parsed_args["porcentaje"] 
+        if por == nothing
+            println("Es necesario indicar el porcentaje en el modo 1.")
+            return
+        end
+        entradas_entrenamiento, salidas_entrenamiento, entradas_test, salidas_test = leer1(input_file, por)
+    elseif modo == 2
+        entradas_entrenamiento, salidas_entrenamiento = leer2(input_file)
+        entradas_test, salidas_test = entradas_entrenamiento, salidas_entrenamiento
+    elseif modo == 3
+        input_test_file = parsed_args["input_test_file"] 
+        if input_test_file == nothing
+            println("Es necesario indicar el fichero utilizado para test en el modo 3.")
+            return
+        end
+        entradas_entrenamiento, salidas_entrenamiento, entradas_test, salidas_test = leer3(input_file, input_test_file)
     end
+    
 
-    input_file = ARGS[1]
-    output_file = ARGS[2]
-    """
-
-    file_lines = readlines(input_file)
-
-    num_atributos, num_clases = split(file_lines[1], " ")
-    num_atributos, num_clases = parse(Int64, num_atributos), parse(Int64, num_clases)
+    num_atributos = size(entradas_entrenamiento[1], 1) - 1
+    num_clases = size(salidas_entrenamiento[1], 1)
     adaline = crear_adaline(num_atributos, num_clases)
 
     fin_entrenamiento = true
     for _ in 1:max_epocas
         # Reset flag
         fin_entrenamiento = true
-        for line in file_lines[2:size(file_lines,1)]
-            valores = map((x) -> parse(Float64, x), split(line, "  "))  # TODO: fix double spaces
-            
-            avanzar_ciclo(adaline, valores[1:num_atributos])
-
-            atributos = [valores[1:num_atributos]; [1]]
-            clases = valores[num_atributos+1:size(valores,1)]
-            fin_entrenamiento = fin_entrenamiento & entrenamiento_adaline(adaline, tasa_aprendizaje, num_atributos+1, atributos, num_clases, clases, tolerancia)
-
+        for i in 1:size(entradas_entrenamiento, 1)
+            atributos = entradas_entrenamiento[i]
+            avanzar_ciclo(adaline, atributos)
+            fin_entrenamiento = fin_entrenamiento & entrenamiento_adaline(adaline, tasa_aprendizaje, num_atributos+1, atributos, num_clases, salidas_entrenamiento[i], tolerancia)
             print_pesos(adaline)
         end
 

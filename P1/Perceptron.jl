@@ -5,6 +5,8 @@ using .Neurona_pkg
 using .Capa_pkg
 using .RedNeuronal_pkg
 
+include("lectura_de_datos.jl")
+
 using ArgParse  # import Pkg; Pkg.add("ArgParse")
 using DelimitedFiles
 
@@ -13,7 +15,7 @@ function parse_commandline()
 
     @add_arg_table s begin
         "--input_file"
-            help = "Fichero con los valores de entrada para la red frio-calor."
+            help = "Fichero con los valores de entrada para entrenar y probar la red (modos 1 y 2). En el modo 3, únicamente es el fichero de entrenamiento."
             required = true
         "--output_file"
             help = "Fichero en el que se van a almacenar los valores de la neurona en cada instante de tiempo."
@@ -30,6 +32,15 @@ function parse_commandline()
             help = "Número máximo de épocas para realizar el entrenamiento."
             arg_type = Int64
             required = true
+        "--modo"
+            help = "Modo de funcionamiento para la lectura de datos."
+            arg_type = Int64
+            required = true
+        "--porcentaje"
+            help = "Porcentaje de datos del fichero utilizados en el entrenamiento. Exclusivo del modo 2."
+            arg_type = Float64
+        "--input_test_file"
+            help = "Fichero con los valores de entrada para probar la red. Exclusivo del modo 3."
     end
 
     return parse_args(s)
@@ -99,7 +110,7 @@ function entrenamiento_perceptron(red::RedNeuronal_pkg.RedNeuronal, tasa_aprendi
             end
         end
     end
-
+    
     return fin_entrenamiento
 end
 
@@ -115,47 +126,59 @@ function print_pesos(red::RedNeuronal_pkg.RedNeuronal)
 end
 
 
+function ECM(prediccion, capa_salida)
+    valores_reales = [neurona.valor_salida for neurona in capa_salida.neuronas]
+    return sum(map((x) -> x^2, prediccion-valores_reales)) / size(prediccion, 1)
+end
 
 function main()
 
     parsed_args = parse_commandline()
 
     input_file = parsed_args["input_file"]
-    output_file = parsed_args["output_file"]
+    output_file = parsed_args["output_file"] # TODO
     umbral = parsed_args["umbral"]
     tasa_aprendizaje = parsed_args["tasa_aprendizaje"]
     max_epocas = parsed_args["max_epocas"]
+    modo = parsed_args["modo"]
 
-    """
-    if size(ARGS) != (2,)
-        println("Número incorrecto de argumentos. Debe ejecutar:")
-        println("julia FrioCalor.jl [input_file] [output_file]")
-        return 
+    if modo == 1
+        por = parsed_args["porcentaje"] 
+        if por == nothing
+            println("Es necesario indicar el porcentaje en el modo 1.")
+            return
+        end
+        entradas_entrenamiento, salidas_entrenamiento, entradas_test, salidas_test = leer1(input_file, por)
+    elseif modo == 2
+        entradas_entrenamiento, salidas_entrenamiento = leer2(input_file)
+        entradas_test, salidas_test = entradas_entrenamiento, salidas_entrenamiento
+    elseif modo == 3
+        input_test_file = parsed_args["input_test_file"] 
+        if input_test_file == nothing
+            println("Es necesario indicar el fichero utilizado para test en el modo 3.")
+            return
+        end
+        entradas_entrenamiento, salidas_entrenamiento, entradas_test, salidas_test = leer3(input_file, input_test_file)
+    else
+        println("Los únicos modos válidos son el 1, 2 y 3.")
+        return
     end
 
-    input_file = ARGS[1]
-    output_file = ARGS[2]
-    """
-
-    file_lines = readlines(input_file)
-
-    num_atributos, num_clases = split(file_lines[1], " ")
-    num_atributos, num_clases = parse(Int64, num_atributos), parse(Int64, num_clases)
+    num_atributos = size(entradas_entrenamiento[1], 1) - 1
+    num_clases = size(salidas_entrenamiento[1], 1)
     perceptron = crear_perceptron(num_atributos, num_clases, umbral)
 
     fin_entrenamiento = true
+
     for _ in 1:max_epocas
         # Reset flag
         fin_entrenamiento = true
-        for line in file_lines[2:size(file_lines,1)]
-            valores = map((x) -> parse(Float64, x), split(line, "  "))  # TODO: fix double spaces
-
-            avanzar_ciclo(perceptron, valores[1:num_atributos])
-
-            atributos = [valores[1:num_atributos]; [1]]
-            clases = valores[num_atributos+1:size(valores,1)]
+        for i in 1:size(entradas_entrenamiento, 1)
+            atributos = entradas_entrenamiento[i]
+            clases = salidas_entrenamiento[i]
+            avanzar_ciclo(perceptron, atributos)
             fin_entrenamiento = fin_entrenamiento & entrenamiento_perceptron(perceptron, tasa_aprendizaje, num_atributos+1, atributos, num_clases, clases)
-
+            println("ECM: ", ECM(clases, perceptron.capas[2]))
             print_pesos(perceptron)
         end
 
