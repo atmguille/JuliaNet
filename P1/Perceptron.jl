@@ -6,6 +6,7 @@ using .Capa_pkg
 using .RedNeuronal_pkg
 
 include("lectura_de_datos.jl")
+include("utils.jl")
 
 using ArgParse  # import Pkg; Pkg.add("ArgParse")
 using DelimitedFiles
@@ -80,19 +81,9 @@ function crear_perceptron(num_atributos::Int64, num_clases::Int64, umbral::Float
     return red
 end
 
-function avanzar_ciclo(red::RedNeuronal_pkg.RedNeuronal, valores_entrada::Vector{Float64})
-    capa_entrada = red.capas[1]
-    for i in 1:size(valores_entrada, 1)
-        Neurona_pkg.Inicializar(capa_entrada.neuronas[i], valores_entrada[i])
-    end
-    RedNeuronal_pkg.Disparar(red)
-    RedNeuronal_pkg.Inicializar(red)
-    RedNeuronal_pkg.Propagar(red)
-end
-
-
+# TODO: tolerancia vacia
 function entrenamiento_perceptron(red::RedNeuronal_pkg.RedNeuronal, tasa_aprendizaje::Float64,
-    num_atributos::Int64, atributos::Vector{Float64}, num_clases::Int64, clases_verdaderas::Vector{Float64})
+    num_atributos::Int64, atributos::Vector{Float64}, num_clases::Int64, clases_verdaderas::Vector{Float64}, tolerancia)
     capa_entrada = red.capas[1]
     capa_salida = red.capas[2]
     # Los valores de salida de la última capa deben ser actualizados para obtener la respuesta final
@@ -114,86 +105,45 @@ function entrenamiento_perceptron(red::RedNeuronal_pkg.RedNeuronal, tasa_aprendi
     return fin_entrenamiento
 end
 
-function print_pesos(red::RedNeuronal_pkg.RedNeuronal)
-    for capa in red.capas
-        for neurona in capa.neuronas
-            for conexion in neurona.conexiones
-                println(conexion.peso)
-            end
-        end
-    end
-    println("_______")
-end
 
-
-function ECM(prediccion, capa_salida)
+function ECM(prediccion::Vector{Float64}, capa_salida::Capa_pkg.Capa)
     valores_reales = [neurona.valor_salida for neurona in capa_salida.neuronas]
     return sum(map((x) -> x^2, prediccion-valores_reales)) / size(prediccion, 1)
+end
+
+function ECM(red::RedNeuronal_pkg.RedNeuronal, entradas::Vector{Vector{Float64}}, salidas::Vector{Vector{Float64}})
+    ecm = 0
+    for i in 1:size(entradas,1)
+        atributos = entradas[i]
+        clases = salidas[i]
+        avanzar_ciclo(red, atributos)
+        Capa_pkg.Disparar(last(red.capas))
+        ecm += ECM(clases, last(red.capas))
+    end
+    ecm /= size(entradas,1)
+    return ecm
 end
 
 function main()
 
     parsed_args = parse_commandline()
 
-    input_file = parsed_args["input_file"]
-    output_file = parsed_args["output_file"] # TODO
     umbral = parsed_args["umbral"]
-    tasa_aprendizaje = parsed_args["tasa_aprendizaje"]
-    max_epocas = parsed_args["max_epocas"]
     modo = parsed_args["modo"]
 
-    if modo == 1
-        por = parsed_args["porcentaje"] 
-        if por == nothing
-            println("Es necesario indicar el porcentaje en el modo 1.")
-            return
-        end
-        entradas_entrenamiento, salidas_entrenamiento, entradas_test, salidas_test = leer1(input_file, por)
-    elseif modo == 2
-        entradas_entrenamiento, salidas_entrenamiento = leer2(input_file)
-        entradas_test, salidas_test = entradas_entrenamiento, salidas_entrenamiento
-    elseif modo == 3
-        input_test_file = parsed_args["input_test_file"] 
-        if input_test_file == nothing
-            println("Es necesario indicar el fichero utilizado para test en el modo 3.")
-            return
-        end
-        entradas_entrenamiento, salidas_entrenamiento, entradas_test, salidas_test = leer3(input_file, input_test_file)
-    else
-        println("Los únicos modos válidos son el 1, 2 y 3.")
+    ret = leer_modo(modo, parsed_args)
+
+    if ret == nothing
         return
     end
+    
+    entradas_entrenamiento, salidas_entrenamiento, entradas_test, salidas_test = ret
 
     num_atributos = size(entradas_entrenamiento[1], 1) - 1
     num_clases = size(salidas_entrenamiento[1], 1)
     perceptron = crear_perceptron(num_atributos, num_clases, umbral)
 
-    fin_entrenamiento = true
-
-    for _ in 1:max_epocas
-        # Reset flag
-        fin_entrenamiento = true
-        for i in 1:size(entradas_entrenamiento, 1)
-            atributos = entradas_entrenamiento[i]
-            clases = salidas_entrenamiento[i]
-            avanzar_ciclo(perceptron, atributos)
-            fin_entrenamiento = fin_entrenamiento & entrenamiento_perceptron(perceptron, tasa_aprendizaje, num_atributos+1, atributos, num_clases, clases)
-            println("ECM: ", ECM(clases, perceptron.capas[2]))
-            print_pesos(perceptron)
-        end
-
-        if fin_entrenamiento
-            println("Entrenamiento finalizado por convergencia en los pesos.")
-            break
-        end
-
-    end
-
-    if !fin_entrenamiento
-        println("Entrenamiento finalizado: número máximo de épocas alcanzado.")
-    end
-    
-    RedNeuronal_pkg.Liberar(perceptron)
+    main_generico(perceptron, entradas_entrenamiento, salidas_entrenamiento, entradas_test, salidas_test, entrenamiento_perceptron, parsed_args)
 
 end
 

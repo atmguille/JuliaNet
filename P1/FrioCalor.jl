@@ -78,17 +78,6 @@ function main()
     input_file = parsed_args["input_file"]
     output_file = parsed_args["output_file"]
 
-    """
-    if size(ARGS) != (2,)
-        println("Número incorrecto de argumentos. Debe ejecutar:")
-        println("julia FrioCalor.jl [input_file] [output_file]")
-        return 
-    end
-
-    input_file = ARGS[1]
-    output_file = ARGS[2]
-    """
-
     red, x1, x2 = crear_red_frio_calor()
 
     valores = Vector{Vector{String}}()
