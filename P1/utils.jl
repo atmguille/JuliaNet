@@ -54,8 +54,6 @@ function main_generico(red::RedNeuronal_pkg.RedNeuronal, entradas_entrenamiento:
     num_atributos = size(entradas_entrenamiento[1], 1) - 1 # TODO: comentar bias en atributos
     num_clases = size(salidas_entrenamiento[1], 1)
 
-    list_ecm_train = []
-    list_ecm_test = []
     predicciones_test = []
 
     fin_entrenamiento = true
@@ -74,8 +72,6 @@ function main_generico(red::RedNeuronal_pkg.RedNeuronal, entradas_entrenamiento:
         println("Época ", epoch)
         println("ECM Train: ", ecm_train, " ECM Test: ", ecm_test)
 
-        push!(list_ecm_train, ecm_train)
-        push!(list_ecm_test, ecm_test)
 
         if fin_entrenamiento
             println("Entrenamiento finalizado por convergencia en los pesos.")
@@ -89,9 +85,6 @@ function main_generico(red::RedNeuronal_pkg.RedNeuronal, entradas_entrenamiento:
     end
 
     writedlm(output_file, predicciones_test)
-
-    writedlm("ECM_train.txt", list_ecm_train)
-    writedlm("ECM_test.txt", list_ecm_test)
     
     RedNeuronal_pkg.Liberar(red)
 
