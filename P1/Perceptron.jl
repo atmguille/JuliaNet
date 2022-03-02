@@ -5,6 +5,9 @@ using .Neurona_pkg
 using .Capa_pkg
 using .RedNeuronal_pkg
 
+include("lectura_de_datos.jl")
+include("utils.jl")
+
 using ArgParse  # import Pkg; Pkg.add("ArgParse")
 using DelimitedFiles
 
@@ -13,7 +16,7 @@ function parse_commandline()
 
     @add_arg_table s begin
         "--input_file"
-            help = "Fichero con los valores de entrada para la red frio-calor."
+            help = "Fichero con los valores de entrada para entrenar y probar la red (modos 1 y 2). En el modo 3, únicamente es el fichero de entrenamiento."
             required = true
         "--output_file"
             help = "Fichero en el que se van a almacenar los valores de la neurona en cada instante de tiempo."
@@ -30,6 +33,15 @@ function parse_commandline()
             help = "Número máximo de épocas para realizar el entrenamiento."
             arg_type = Int64
             required = true
+        "--modo"
+            help = "Modo de funcionamiento para la lectura de datos."
+            arg_type = Int64
+            required = true
+        "--porcentaje"
+            help = "Porcentaje de datos del fichero utilizados en el entrenamiento. Exclusivo del modo 2."
+            arg_type = Float64
+        "--input_test_file"
+            help = "Fichero con los valores de entrada para probar la red. Exclusivo del modo 3."
     end
 
     return parse_args(s)
@@ -69,19 +81,9 @@ function crear_perceptron(num_atributos::Int64, num_clases::Int64, umbral::Float
     return red
 end
 
-function avanzar_ciclo(red::RedNeuronal_pkg.RedNeuronal, valores_entrada::Vector{Float64})
-    capa_entrada = red.capas[1]
-    for i in 1:size(valores_entrada, 1)
-        Neurona_pkg.Inicializar(capa_entrada.neuronas[i], valores_entrada[i])
-    end
-    RedNeuronal_pkg.Disparar(red)
-    RedNeuronal_pkg.Inicializar(red)
-    RedNeuronal_pkg.Propagar(red)
-end
-
-
+# TODO: tolerancia vacia
 function entrenamiento_perceptron(red::RedNeuronal_pkg.RedNeuronal, tasa_aprendizaje::Float64,
-    num_atributos::Int64, atributos::Vector{Float64}, num_clases::Int64, clases_verdaderas::Vector{Float64})
+    num_atributos::Int64, atributos::Vector{Float64}, num_clases::Int64, clases_verdaderas::Vector{Float64}, tolerancia)
     capa_entrada = red.capas[1]
     capa_salida = red.capas[2]
     # Los valores de salida de la última capa deben ser actualizados para obtener la respuesta final
@@ -99,78 +101,49 @@ function entrenamiento_perceptron(red::RedNeuronal_pkg.RedNeuronal, tasa_aprendi
             end
         end
     end
-
+    
     return fin_entrenamiento
 end
 
-function print_pesos(red::RedNeuronal_pkg.RedNeuronal)
-    for capa in red.capas
-        for neurona in capa.neuronas
-            for conexion in neurona.conexiones
-                println(conexion.peso)
-            end
-        end
-    end
-    println("_______")
+
+function ECM(prediccion::Vector{Float64}, capa_salida::Capa_pkg.Capa)
+    valores_reales = [neurona.valor_salida for neurona in capa_salida.neuronas]
+    return sum(map((x) -> x^2, prediccion-valores_reales)) / size(prediccion, 1)
 end
 
-
+function ECM(red::RedNeuronal_pkg.RedNeuronal, entradas::Vector{Vector{Float64}}, salidas::Vector{Vector{Float64}})
+    ecm = 0
+    for i in 1:size(entradas,1)
+        atributos = entradas[i]
+        clases = salidas[i]
+        avanzar_ciclo(red, atributos)
+        Capa_pkg.Disparar(last(red.capas))
+        ecm += ECM(clases, last(red.capas))
+    end
+    ecm /= size(entradas,1)
+    return ecm
+end
 
 function main()
 
     parsed_args = parse_commandline()
 
-    input_file = parsed_args["input_file"]
-    output_file = parsed_args["output_file"]
     umbral = parsed_args["umbral"]
-    tasa_aprendizaje = parsed_args["tasa_aprendizaje"]
-    max_epocas = parsed_args["max_epocas"]
+    modo = parsed_args["modo"]
 
-    """
-    if size(ARGS) != (2,)
-        println("Número incorrecto de argumentos. Debe ejecutar:")
-        println("julia FrioCalor.jl [input_file] [output_file]")
-        return 
-    end
+    ret = leer_modo(modo, parsed_args)
 
-    input_file = ARGS[1]
-    output_file = ARGS[2]
-    """
-
-    file_lines = readlines(input_file)
-
-    num_atributos, num_clases = split(file_lines[1], " ")
-    num_atributos, num_clases = parse(Int64, num_atributos), parse(Int64, num_clases)
-    perceptron = crear_perceptron(num_atributos, num_clases, umbral)
-
-    fin_entrenamiento = true
-    for _ in 1:max_epocas
-        # Reset flag
-        fin_entrenamiento = true
-        for line in file_lines[2:size(file_lines,1)]
-            valores = map((x) -> parse(Float64, x), split(line, "  "))  # TODO: fix double spaces
-
-            avanzar_ciclo(perceptron, valores[1:num_atributos])
-
-            atributos = [valores[1:num_atributos]; [1]]
-            clases = valores[num_atributos+1:size(valores,1)]
-            fin_entrenamiento = fin_entrenamiento & entrenamiento_perceptron(perceptron, tasa_aprendizaje, num_atributos+1, atributos, num_clases, clases)
-
-            print_pesos(perceptron)
-        end
-
-        if fin_entrenamiento
-            println("Entrenamiento finalizado por convergencia en los pesos.")
-            break
-        end
-
-    end
-
-    if !fin_entrenamiento
-        println("Entrenamiento finalizado: número máximo de épocas alcanzado.")
+    if ret == nothing
+        return
     end
     
-    RedNeuronal_pkg.Liberar(perceptron)
+    entradas_entrenamiento, salidas_entrenamiento, entradas_test, salidas_test = ret
+
+    num_atributos = size(entradas_entrenamiento[1], 1) - 1
+    num_clases = size(salidas_entrenamiento[1], 1)
+    perceptron = crear_perceptron(num_atributos, num_clases, umbral)
+
+    main_generico(perceptron, entradas_entrenamiento, salidas_entrenamiento, entradas_test, salidas_test, entrenamiento_perceptron, parsed_args)
 
 end
 

@@ -2,14 +2,14 @@ using Random
 
 function leer2(fichero_de_datos::String)
     file_lines = readlines(fichero_de_datos)
-    num_atributos, num_clases = split(file_lines[1], " ")
+    num_atributos, num_clases = split(file_lines[1])
     num_atributos, num_clases = parse(Int64, num_atributos), parse(Int64, num_clases)
 
     entradas = Vector{Vector{Float64}}()
     salidas = Vector{Vector{Float64}}()
 
     for line in file_lines[2:size(file_lines,1)]
-        valores = map((x) -> parse(Float64, x), split(line, "  "))  # TODO: fix double space
+        valores = map((x) -> parse(Float64, x), split(line))
         push!(entradas, [valores[1:num_atributos]; [1]])  # Añadimos el 1 del bias
         push!(salidas, valores[num_atributos+1:size(valores,1)])
     end
@@ -34,5 +34,31 @@ end
 function leer3(fichero_de_entrenamiento::String, fichero_de_test::String)
     entradas_entrenamiento, salidas_entrenamiento = leer2(fichero_de_entrenamiento)
     entradas_test, salidas_test = leer2(fichero_de_test)
+    return entradas_entrenamiento, salidas_entrenamiento, entradas_test, salidas_test
+end
+
+
+function leer_modo(modo::Int64, parsed_args::Dict)
+    input_file = parsed_args["input_file"]
+    
+    if modo == 1
+        porcentaje = parsed_args["porcentaje"]
+        if porcentaje == nothing
+            println("Es necesario indicar el porcentaje en el modo 1.")
+            return nothing
+        end
+        entradas_entrenamiento, salidas_entrenamiento, entradas_test, salidas_test = leer1(input_file, porcentaje)
+    elseif modo == 2
+        entradas_entrenamiento, salidas_entrenamiento = leer2(input_file)
+        entradas_test, salidas_test = entradas_entrenamiento, salidas_entrenamiento
+    elseif modo == 3
+        input_test_file = parsed_args["input_test_file"]
+        if input_test_file == nothing
+            println("Es necesario indicar el fichero utilizado para test en el modo 3.")
+            return nothing
+        end
+        entradas_entrenamiento, salidas_entrenamiento, entradas_test, salidas_test = leer3(input_file, input_test_file)
+    end
+
     return entradas_entrenamiento, salidas_entrenamiento, entradas_test, salidas_test
 end
