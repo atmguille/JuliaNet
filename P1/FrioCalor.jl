@@ -62,7 +62,8 @@ function crear_red_frio_calor()
     return red, x1, x2
 end
 
-function avanzar_ciclo(red::RedNeuronal_pkg.RedNeuronal, x1::Neurona_pkg.Neurona, calor::Float64, x2::Neurona_pkg.Neurona, frio::Float64)
+function avanzar_ciclo(red::RedNeuronal_pkg.RedNeuronal, x1::Neurona_pkg.Neurona, calor::Float64,
+                       x2::Neurona_pkg.Neurona, frio::Float64)
     Neurona_pkg.Inicializar(x1, calor)
     Neurona_pkg.Inicializar(x2, frio)
     RedNeuronal_pkg.Disparar(red)

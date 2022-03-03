@@ -83,8 +83,8 @@ end
 
 
 function entrenamiento_adaline(red::RedNeuronal_pkg.RedNeuronal, tasa_aprendizaje::Float64,
-    num_atributos::Int64, atributos::Vector{Float64}, num_clases::Int64,
-    clases_verdaderas::Vector{Float64}, tolerancia::Float64)
+                               num_atributos::Int64, atributos::Vector{Float64}, num_clases::Int64,
+                               clases_verdaderas::Vector{Float64}, tolerancia::Float64)
     capa_entrada = red.capas[1]
     capa_salida = red.capas[2]
 
@@ -129,7 +129,8 @@ function main()
     num_clases = size(salidas_entrenamiento[1], 1)
     adaline = crear_adaline(num_atributos, num_clases)
 
-    main_generico(adaline, entradas_entrenamiento, salidas_entrenamiento, entradas_test, salidas_test, entrenamiento_adaline, parsed_args)
+    main_generico(adaline, entradas_entrenamiento, salidas_entrenamiento, entradas_test,
+                  salidas_test, entrenamiento_adaline, parsed_args)
 
 end
 

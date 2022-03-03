@@ -83,7 +83,8 @@ end
 
 # TODO: tolerancia vacia
 function entrenamiento_perceptron(red::RedNeuronal_pkg.RedNeuronal, tasa_aprendizaje::Float64,
-    num_atributos::Int64, atributos::Vector{Float64}, num_clases::Int64, clases_verdaderas::Vector{Float64}, tolerancia)
+                                  num_atributos::Int64, atributos::Vector{Float64},
+                                  num_clases::Int64, clases_verdaderas::Vector{Float64}, tolerancia)
     capa_entrada = red.capas[1]
     capa_salida = red.capas[2]
     # Los valores de salida de la última capa deben ser actualizados para obtener la respuesta final
@@ -105,25 +106,6 @@ function entrenamiento_perceptron(red::RedNeuronal_pkg.RedNeuronal, tasa_aprendi
     return fin_entrenamiento
 end
 
-
-function ECM(prediccion::Vector{Float64}, capa_salida::Capa_pkg.Capa)
-    valores_reales = [neurona.valor_salida for neurona in capa_salida.neuronas]
-    return sum(map((x) -> x^2, prediccion-valores_reales)) / size(prediccion, 1)
-end
-
-function ECM(red::RedNeuronal_pkg.RedNeuronal, entradas::Vector{Vector{Float64}}, salidas::Vector{Vector{Float64}})
-    ecm = 0
-    for i in 1:size(entradas,1)
-        atributos = entradas[i]
-        clases = salidas[i]
-        avanzar_ciclo(red, atributos)
-        Capa_pkg.Disparar(last(red.capas))
-        ecm += ECM(clases, last(red.capas))
-    end
-    ecm /= size(entradas,1)
-    return ecm
-end
-
 function main()
 
     parsed_args = parse_commandline()
@@ -143,7 +125,8 @@ function main()
     num_clases = size(salidas_entrenamiento[1], 1)
     perceptron = crear_perceptron(num_atributos, num_clases, umbral)
 
-    main_generico(perceptron, entradas_entrenamiento, salidas_entrenamiento, entradas_test, salidas_test, entrenamiento_perceptron, parsed_args)
+    main_generico(perceptron, entradas_entrenamiento, salidas_entrenamiento, entradas_test,
+                  salidas_test, entrenamiento_perceptron, parsed_args)
 
 end
 

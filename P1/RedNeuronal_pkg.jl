@@ -46,18 +46,3 @@ function Propagar(red_neuronal::RedNeuronal)
 end
 
 end
-
-"""
-red = RedNeuronal_pkg.Crear()
-neurona1 = RedNeuronal_pkg.Capa_pkg.Neurona_pkg.Crear(1.0, RedNeuronal_pkg.Capa_pkg.Neurona_pkg.Sesgo)
-neurona2 = RedNeuronal_pkg.Capa_pkg.Neurona_pkg.Crear(1.0, RedNeuronal_pkg.Capa_pkg.Neurona_pkg.Sesgo)
-RedNeuronal_pkg.Capa_pkg.Neurona_pkg.Conectar(neurona1, neurona2, 0.5)
-capa = RedNeuronal_pkg.Capa_pkg.Crear()
-RedNeuronal_pkg.Capa_pkg.Añadir(capa, neurona1)
-RedNeuronal_pkg.Añadir(red, capa)
-RedNeuronal_pkg.Disparar(red)
-RedNeuronal_pkg.Propagar(red)
-print(neurona1.valor_salida)
-print(neurona2.valor_entrada)
-RedNeuronal_pkg.Liberar(red)
-"""

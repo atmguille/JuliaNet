@@ -25,7 +25,8 @@ function ECM(valores_reales::Vector{Float64}, prediccion::Vector{Float64})
     return sum(map((x) -> x^2, prediccion-valores_reales)) / size(prediccion, 1)
 end
 
-function predicciones_y_ECM(red::RedNeuronal_pkg.RedNeuronal, entradas::Vector{Vector{Float64}}, salidas::Vector{Vector{Float64}})
+function predicciones_y_ECM(red::RedNeuronal_pkg.RedNeuronal, entradas::Vector{Vector{Float64}},
+                            salidas::Vector{Vector{Float64}})
     predicciones = []
     
     ecm = 0
@@ -43,8 +44,9 @@ function predicciones_y_ECM(red::RedNeuronal_pkg.RedNeuronal, entradas::Vector{V
     return ecm, predicciones 
 end
 
-function main_generico(red::RedNeuronal_pkg.RedNeuronal, entradas_entrenamiento::Vector{Vector{Float64}}, salidas_entrenamiento::Vector{Vector{Float64}}, 
-    entradas_test::Vector{Vector{Float64}}, salidas_test::Vector{Vector{Float64}}, funcion_entrenamiento::Function, parsed_args::Dict)
+function main_generico(red::RedNeuronal_pkg.RedNeuronal, entradas_entrenamiento::Vector{Vector{Float64}},
+                       salidas_entrenamiento::Vector{Vector{Float64}}, entradas_test::Vector{Vector{Float64}},
+                       salidas_test::Vector{Vector{Float64}}, funcion_entrenamiento::Function, parsed_args::Dict)
 
     output_file = parsed_args["output_file"]
     tasa_aprendizaje = parsed_args["tasa_aprendizaje"]
@@ -64,7 +66,9 @@ function main_generico(red::RedNeuronal_pkg.RedNeuronal, entradas_entrenamiento:
             atributos = entradas_entrenamiento[i]
             clases = salidas_entrenamiento[i]
             avanzar_ciclo(red, atributos)
-            fin_entrenamiento = fin_entrenamiento & funcion_entrenamiento(red, tasa_aprendizaje, num_atributos+1, atributos, num_clases, clases, tolerancia)
+            fin_entrenamiento = fin_entrenamiento & funcion_entrenamiento(red, tasa_aprendizaje,
+                                                                          num_atributos+1, atributos,
+                                                                          num_clases, clases, tolerancia)
         end
 
         ecm_train, _ = predicciones_y_ECM(red, entradas_entrenamiento, salidas_entrenamiento)

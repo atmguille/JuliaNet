@@ -79,7 +79,8 @@ end
 
 Inicializar(neurona::Neurona, x::Float64) = neurona.valor_entrada = x
 
-Conectar(neurona_origen::Neurona, neurona_destino::Neurona, peso::Float64) = push!(neurona_origen.conexiones, Conexion_pkg.Crear(peso, neurona_destino))
+Conectar(neurona_origen::Neurona, neurona_destino::Neurona, peso::Float64) = push!(neurona_origen.conexiones,
+                                                                                   Conexion_pkg.Crear(peso, neurona_destino))
 
 function Disparar(neurona::Neurona)
     if neurona.tipo == Directa
