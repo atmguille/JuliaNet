@@ -5,7 +5,7 @@ using .Neurona_pkg
 using .Capa_pkg
 using .RedNeuronal_pkg
 
-include("lectura_de_datos.jl")
+include("LecturaDatos.jl")
 include("utils.jl")
 
 using ArgParse  # import Pkg; Pkg.add("ArgParse")

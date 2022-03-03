@@ -5,7 +5,7 @@ using .Neurona_pkg
 using .Capa_pkg
 using .RedNeuronal_pkg
 
-include("lectura_de_datos.jl")
+include("LecturaDatos.jl")
 include("utils.jl")
 
 using ArgParse  # import Pkg; Pkg.add("ArgParse")
@@ -94,24 +94,19 @@ function entrenamiento_adaline(red::RedNeuronal_pkg.RedNeuronal, tasa_aprendizaj
         for atributo_index in 1:num_atributos
             conexion = capa_entrada.neuronas[atributo_index].conexiones[clase_index]
             conexion.peso_anterior = conexion.peso
-            # En fase de entrenamiento, se usa el valor de entrada como respuesta (sin activación) # TODO: ojo que al predecir sí que hay que usar el valor de salida
+            # En fase de entrenamiento, se usa el valor de entrada como respuesta (sin activación)
             y_in = capa_salida.neuronas[clase_index].valor_entrada
             t = clases_verdaderas[clase_index]
             delta = tasa_aprendizaje * (t-y_in) * atributos[atributo_index]
             conexion.peso += delta
-
-            if delta > max_delta
-                max_delta = delta
-            end
+            max_delta = max(max_delta, abs(delta))
         end
     end
-
     if max_delta < tolerancia
         fin_entrenamiento = true
     else
         fin_entrenamiento = false
     end
-
     return fin_entrenamiento
 end
 
