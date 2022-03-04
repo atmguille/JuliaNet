@@ -61,7 +61,7 @@ function crear_red_frio_calor()
     Neurona_pkg.Conectar(z2, z1, 2.0)
     Neurona_pkg.Conectar(z2, y2, 1.0)
 
-    return red, x1, x2
+    return red
 end
 
 function main()
@@ -71,7 +71,7 @@ function main()
     input_file = parsed_args["input_file"]
     output_file = parsed_args["output_file"]
 
-    red, x1, x2 = crear_red_frio_calor()
+    red = crear_red_frio_calor()
 
     valores = Vector{Vector{String}}()
     push!(valores, ["x1", "x2", "z1", "z2", "y1", "y2"])
