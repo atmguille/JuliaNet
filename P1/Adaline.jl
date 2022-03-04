@@ -47,7 +47,15 @@ function parse_commandline()
     return parse_args(s)
 end
 
+"""
+    crear_adaline(num_atributos::Int64, num_clases::Int64)
 
+Crea un red en base a los argumentos recibidos con neuronas de tipo Adaline
+# Arguments:
+- `num_atributos::Int64`: número de atributos de entrada
+- `num_clases::Int64`: número de clases de salida (a predecir)
+
+"""
 function crear_adaline(num_atributos::Int64, num_clases::Int64)
     red = RedNeuronal_pkg.Crear()
 
@@ -72,16 +80,29 @@ function crear_adaline(num_atributos::Int64, num_clases::Int64)
 
     RedNeuronal_pkg.Añadir(red, capa_salida)
     
-    for neur_in in capa_entrada.neuronas
-        for neur_out in capa_salida.neuronas
-            Neurona_pkg.Conectar(neur_in, neur_out, 0.0)
-        end
-    end
+    Capa_pkg.Conectar(capa_entrada, capa_salida, 0.0, 0.0)
 
     return red
 end
 
+"""
+    entrenamiento_adaline(red::RedNeuronal, tasa_aprendizaje::Float64,
+                               num_atributos::Int64, atributos::Vector, num_clases::Int64,
+                               clases_verdaderas::Vector, tolerancia::Float64) -> Bool
 
+Entrena la red de tipo Adaline con los valores de entrada proporcionados, actualizando los pesos
+correspondientes. Devuelve `true` si el máximo cambio de pesos está por debajo de la tolerancia,
+`false` en caso contrario. Esto se usa para determinar el final del entrenamiento.
+# Arguments:
+- `red::RedNeuronal`: red a entrenar
+- `tasa_aprendizaje::Float64`: tasa de aprendizaje
+- `num_atributos::Int64`: número de atributos de entrada
+- `atributos::Vector`: valores de entrada
+- `num_clases::Int64`: número de clases de salida (a predecir)
+- `clases_verdaderas::Vector`: clases de salida verdaderas
+- `tolerancia::Float64`: tolerancia para determinar fin de entrenamiento
+
+"""
 function entrenamiento_adaline(red::RedNeuronal_pkg.RedNeuronal, tasa_aprendizaje::Float64,
                                num_atributos::Int64, atributos::Vector{Float64}, num_clases::Int64,
                                clases_verdaderas::Vector{Float64}, tolerancia::Float64)
@@ -124,7 +145,7 @@ function main()
     end
     
     entradas_entrenamiento, salidas_entrenamiento, entradas_test, salidas_test = ret
-
+    # Las entradas ya contienen la constante del bias, luego restamos 1 para el número de atributos
     num_atributos = size(entradas_entrenamiento[1], 1) - 1
     num_clases = size(salidas_entrenamiento[1], 1)
     adaline = crear_adaline(num_atributos, num_clases)

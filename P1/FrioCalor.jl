@@ -5,6 +5,8 @@ using .Neurona_pkg
 using .Capa_pkg
 using .RedNeuronal_pkg
 
+include("utils.jl")
+
 using ArgParse  # import Pkg; Pkg.add("ArgParse")
 using DelimitedFiles
 
@@ -62,16 +64,6 @@ function crear_red_frio_calor()
     return red, x1, x2
 end
 
-function avanzar_ciclo(red::RedNeuronal_pkg.RedNeuronal, x1::Neurona_pkg.Neurona, calor::Float64,
-                       x2::Neurona_pkg.Neurona, frio::Float64)
-    Neurona_pkg.Inicializar(x1, calor)
-    Neurona_pkg.Inicializar(x2, frio)
-    RedNeuronal_pkg.Disparar(red)
-    RedNeuronal_pkg.Inicializar(red)
-    RedNeuronal_pkg.Propagar(red)
-end
-
-
 function main()
 
     parsed_args = parse_commandline()
@@ -86,15 +78,15 @@ function main()
 
     for line in readlines(input_file)
         calor, frio = split(line, " ")
-        avanzar_ciclo(red, x1, parse(Float64, calor), x2, parse(Float64, frio))
+        avanzar_ciclo(red, [parse(Float64, calor), parse(Float64, frio)])
         push!(valores, [string(convert(Int64, neurona.valor_salida)) for capa in red.capas for neurona in capa.neuronas])
     end
 
-    # TODO: Comentar
-    avanzar_ciclo(red, x1, 0.0, x2, 0.0)
+    # Es necesario avanzar ciclo dos veces más para descargar por completo la red
+    avanzar_ciclo(red, [0.0, 0.0])
     push!(valores, [string(convert(Int64, neurona.valor_salida)) for capa in red.capas for neurona in capa.neuronas])
 
-    avanzar_ciclo(red, x1, 0.0, x2, 0.0)
+    avanzar_ciclo(red, [0.0, 0.0])
     push!(valores, [string(convert(Int64, neurona.valor_salida)) for capa in red.capas for neurona in capa.neuronas])
     
     writedlm(output_file, valores)

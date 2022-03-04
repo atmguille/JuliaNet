@@ -1,3 +1,17 @@
+"""
+    avanzar_ciclo(red::RedNeuronal, valores_entrada::Vector)
+
+Avanza un ciclo de la red neuronal. Consiste en:
+* Inicializar la capa de entrada a los valores de entrada
+* Disparar todas las neuronas de la red
+* Descargar las neuronas de la red (inicialización de valores de entrada a 0)
+* Propagar todas las neuronas de la red
+
+# Arguments:
+- `red::RedNeuronal`: Red neuronal
+- `valores_entrada::Vector`: Valores de entrada
+
+"""
 function avanzar_ciclo(red::RedNeuronal_pkg.RedNeuronal, valores_entrada::Vector{Float64})
     capa_entrada = red.capas[1]
     for i in 1:size(valores_entrada, 1)
@@ -8,7 +22,14 @@ function avanzar_ciclo(red::RedNeuronal_pkg.RedNeuronal, valores_entrada::Vector
     RedNeuronal_pkg.Propagar(red)
 end
 
+"""
+    print_pesos(red::RedNeuronal)
 
+Imprime todos los pesos de la red neuronal.
+# Arguments:
+- `red::RedNeuronal`: Red neuronal
+
+"""
 function print_pesos(red::RedNeuronal_pkg.RedNeuronal)
     for capa in red.capas
         for neurona in capa.neuronas
@@ -20,11 +41,30 @@ function print_pesos(red::RedNeuronal_pkg.RedNeuronal)
     println("----------------")
 end
 
+"""
+    ECM(valores_reales::Vector, prediccion::Vector)
 
+Calcula el error cuadrático medio (ECM) entre los valores reales y la predicción.
+# Arguments:
+- `valores_reales::Vector`: Valores reales
+- `prediccion::Vector`: Predicción
+
+"""
 function ECM(valores_reales::Vector{Float64}, prediccion::Vector{Float64})
     return sum(map((x) -> x^2, prediccion-valores_reales)) / size(prediccion, 1)
 end
 
+"""
+    predicciones_y_ECM(red::RedNeuronal, entradas::Vector, salidas::Vector) -> (Float64, Vector)
+
+Calcula las predicciones y el error cuadrático medio (ECM) de la red neuronal,
+devolviendo (ECM, predicciones)
+# Arguments:
+- `red::RedNeuronal`: Red neuronal
+- `entradas::Vector`: Valores de entrada de la red
+- `salidas::Vector`: Valores esperados de salida de la red
+
+"""
 function predicciones_y_ECM(red::RedNeuronal_pkg.RedNeuronal, entradas::Vector{Vector{Float64}},
                             salidas::Vector{Vector{Float64}})
     predicciones = []
@@ -44,6 +84,23 @@ function predicciones_y_ECM(red::RedNeuronal_pkg.RedNeuronal, entradas::Vector{V
     return ecm, predicciones 
 end
 
+"""
+    main_generico(red::RedNeuronal, entradas_entrenamiento::Vector, salidas_entrenamiento::Vector,
+                  entradas_test::Vector, salidas_test::Vector, funcion_entrenamiento::Function,
+                  parsed_args::Dict)
+
+Función genérica para entrenar una red neuronal para un conjunto de datos de entrenamiento
+y obtener las predicciones para un conjunto de datos de test.
+# Arguments:
+- `red::RedNeuronal`: Red neuronal
+- `entradas_entrenamiento::Vector`: Valores de entrada de entrenamiento de la red
+- `salidas_entrenamiento::Vector`: Valores esperados de salida de entrenamiento de la red
+- `entradas_test::Vector`: Valores de entrada de test de la red
+- `salidas_test::Vector`: Valores esperados de salida de test de la red
+- `funcion_entrenamiento::Function`: Función usada para el entrenamiento de la red
+- `parsed_args::Dict`: Argumentos de entrada al programa
+
+"""
 function main_generico(red::RedNeuronal_pkg.RedNeuronal, entradas_entrenamiento::Vector{Vector{Float64}},
                        salidas_entrenamiento::Vector{Vector{Float64}}, entradas_test::Vector{Vector{Float64}},
                        salidas_test::Vector{Vector{Float64}}, funcion_entrenamiento::Function, parsed_args::Dict)
@@ -53,7 +110,8 @@ function main_generico(red::RedNeuronal_pkg.RedNeuronal, entradas_entrenamiento:
     max_epocas = parsed_args["max_epocas"]
     tolerancia = get(parsed_args, "tolerancia", 0.0)
 
-    num_atributos = size(entradas_entrenamiento[1], 1) - 1 # TODO: comentar bias en atributos
+    # Las entradas ya contienen la constante del bias, luego restamos 1 para el número de atributos
+    num_atributos = size(entradas_entrenamiento[1], 1) - 1
     num_clases = size(salidas_entrenamiento[1], 1)
 
     predicciones_test = []

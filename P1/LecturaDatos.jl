@@ -1,5 +1,14 @@
 using Random
 
+"""
+    leer2(fichero_de_datos::String) -> (Array{Float64}, Array{Float64})
+
+Lee el fichero indicado en Modo 2, devolviendo (entradas, salidas).
+Las entradas contiene un 1 constante al final de cada fila, usado como entrada para el bias de las redes.
+# Arguments:
+- `fichero_de_datos`: nombre del fichero de datos a leer
+
+"""
 function leer2(fichero_de_datos::String)
     file_lines = readlines(fichero_de_datos)
     num_atributos, num_clases = split(file_lines[1])
@@ -17,6 +26,16 @@ function leer2(fichero_de_datos::String)
     return entradas, salidas
 end
 
+"""
+    leer1(fichero_de_datos::String, por::Float64) -> (Array{Float64}, Array{Float64}, Array{Float64}, Array{Float64})
+
+Lee el fichero indicado en Modo 1, devolviendo
+(entradas_entrenamiento, salidas_entrenamiento, entradas_test, salidas_test)
+# Arguments:
+- `fichero_de_datos`: nombre del fichero de datos a leer
+- `por`: porcentaje de datos para entrenamiento
+
+"""
 function leer1(fichero_de_datos::String, por::Float64)
     entradas, salidas = leer2(fichero_de_datos)
 
@@ -31,13 +50,37 @@ function leer1(fichero_de_datos::String, por::Float64)
     return entradas_entrenamiento, salidas_entrenamiento, entradas_test, salidas_test
 end
 
+"""
+    leer3(fichero_de_entrenamiento::String, fichero_de_test::String) -> (Array{Float64},
+                                                                         Array{Float64},
+                                                                         Array{Float64},
+                                                                         Array{Float64})
+
+Lee los ficheros indicados en Modo 3, devolviendo
+(entradas_entrenamiento, salidas_entrenamiento, entradas_test, salidas_test)
+# Arguments:
+- `fichero_de_entrenamiento`: nombre del fichero de datos de entrenamiento
+- `fichero_de_test`: nombre del fichero de datos de test
+
+"""
 function leer3(fichero_de_entrenamiento::String, fichero_de_test::String)
     entradas_entrenamiento, salidas_entrenamiento = leer2(fichero_de_entrenamiento)
     entradas_test, salidas_test = leer2(fichero_de_test)
     return entradas_entrenamiento, salidas_entrenamiento, entradas_test, salidas_test
 end
 
+"""
+    leer_modo(modo::Int64, parsed_args::Dict) -> (Array{Float64}, Array{Float64}, Array{Float64}, Array{Float64})
 
+Lee los ficheros incluidos en parsed_args en el modo indicado, devolviendo
+(entradas_entrenamiento, salidas_entrenamiento, entradas_test, salidas_test)
+# Arguments:
+- `modo`: modo de lectura
+- `parsed_args`: diccionario que debe contener el nombre del fichero a leer en "input_file".
+                 Si el modo lo requiere, debe contener el porcentaje en "porcentaje".
+                 Si el modo lo requiere, debe contener el nombre del fichero de test en "input_test_file".
+
+"""
 function leer_modo(modo::Int64, parsed_args::Dict)
     input_file = parsed_args["input_file"]
     
