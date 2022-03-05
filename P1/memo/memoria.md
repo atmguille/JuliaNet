@@ -77,7 +77,7 @@ Es importante notar que durante el entrenamiento del Perceptrón es necesario di
 
 Cabe mencionar que los resultados presentados a continuación no son del todo replicables, dado que se nos requiere ejecutar los algoritmos en **Modo 1**, que por definición es aleatorio en cada lectura. De todas maneras, hemos realizado varias ejecuciones por cada resultado para cerciorarnos de que las conclusiones mostradas no dependían del azar.
 
-En primer lugar, presentamos la evolución de nuestra métrica de error (Error Cuadrático Medio) para ambos algoritmos con las configuraciones que mejor resultado han dado.
+En primer lugar, presentamos la evolución de nuestra métrica de error (Error Cuadrático Medio) y rendimiento (Accuracy) para ambos algoritmos con las configuraciones que mejor resultado han dado.
 
 Dichas configuraciones consisten en:
 
@@ -85,11 +85,12 @@ Dichas configuraciones consisten en:
 
 * En el caso del Adaline, una tasa de aprendizaje de 0.04, una tolerancia de 0.02 y 50 épocas.
 
-|               Perceptrón                |               Adaline                |
-| :-------------------------------------: | :----------------------------------: |
-| ![](../img/ECM_perceptron_epoca_50.png) | ![](../img/ECM_adaline_epoca_50.png) |
+|                     Perceptrón                     |                     Adaline                     |
+| :------------------------------------------------: | :---------------------------------------------: |
+|   ![](../img/ECM_perceptron_problema_real1.png)    |   ![](../img/ECM_adaline_problema_real1.png)    |
+| ![](../img/Accuracy_perceptron_problema_real1.png) | ![](../img/Accuracy_adaline_problema_real1.png) |
 
-Es llamativa como el ECM en Adaline permanece constante tras cierto número de épocas. Creemos que esto se debe a que el algoritmo alcanza un mínimo local de la función de coste, donde el gradiente es cercano $0$. Esto se debe a que la regla de aprendizaje del Adaline minimiza el ECM usando descenso por gradiente, luego si llegamos a un punto donde el gradiente es casi nulo, no habrá apenas actualización de pesos en las iteraciones sucesivas. Observamos que este fenómeno no se produce en el perceptrón, cuyo ECM oscila en mayor medida, ya que su regla de aprendizaje no lo minimiza.
+Es llamativa como el ECM en Adaline permanece constante tras cierto número de épocas. Creemos que esto se debe a que el algoritmo alcanza un mínimo local de la función de coste, donde el gradiente es cercano $0$. Esto se debe a que la regla de aprendizaje del Adaline minimiza el ECM usando descenso por gradiente, luego si llegamos a un punto donde el gradiente es casi nulo, no habrá apenas actualización de pesos en las iteraciones sucesivas. Este razonamiento se contrasta observando la gráfica del accuracy. El rendimiento a la hora de clasificar es tan elevado desde el principio que es esperable que apenas haya aprendizaje. Observamos que este fenómeno no se produce en el perceptrón, cuyo ECM y accuracy oscila en mayor medida, ya que su regla de aprendizaje no lo minimiza.
 
 Estudiamos a continuación la influencia que tienen los distintos parámetros sobre el resultado.
 
@@ -150,7 +151,11 @@ Presentamos a continuación los resultados para el archivo `problema_real2.txt`.
 * En el caso del Perceptrón, una tasa de aprendizaje de 0.025, un umbral de 0.2 y 50 épocas.
 * En el caso del Adaline, una tasa de aprendizaje de 0.008, una tolerancia de 0.002 y 50 épocas.
 
-|                  Perceptrón                   |                  Adaline                   |
-| :-------------------------------------------: | :----------------------------------------: |
-| ![](../img/ECM_perceptron_problema_real2.png) | ![](../img/ECM_adaline_problema_real2.png) |
+|                     Perceptrón                     |                     Adaline                     |
+| :------------------------------------------------: | :---------------------------------------------: |
+|   ![](../img/ECM_perceptron_problema_real2.png)    |   ![](../img/ECM_adaline_problema_real2.png)    |
+| ![](../img/Accuracy_perceptron_problema_real2.png) | ![](../img/Accuracy_adaline_problema_real2.png) |
 
+A diferencia del problema real 1, en este caso las redes no aprenden tan rápidamente de los datos. En el problema real 1, con un bajo número de épocas se alcanzaban valores de error cuadrático medio muy bajos y de accuracy muy altos, provocando que en el caso del Adaline, esos valores permaneciesen constantes en casi todos los experimentos. En este problema, la red no se ajusta tan rápidamente a los datos de entrenamiento, provocando que se observe otro fenómeno diferente, en el que el ECM va disminuyendo de manera progresiva hasta alcanzar un mínimo local. Dicho de otra manera, las gráficas del problema real 1 del Adaline tienen un comportamiento similar a lo que sucede en este problema a partir de la época 40.
+
+En el caso del Perceptrón se observa una vez más un mayor número de oscilaciones en el proceso de entrenamiento. También cabe destacar que, aunque el Perceptrón alcance valores más bajos de ECM que el Adaline, su accuracy a la hora de predecir es menor. Esto se debe a que las predicciones que se clasifican en la clase 0 en el caso del Perceptrón tienen un efecto menor en el ECM que un dato clasificado en la clase contraria, pero siempre será considerado como clasificado erróneamente por el accuracy.

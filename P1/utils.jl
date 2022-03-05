@@ -55,21 +55,22 @@ function ECM(valores_reales::Vector{Float64}, prediccion::Vector{Float64})
 end
 
 """
-    predicciones_y_ECM(red::RedNeuronal, entradas::Vector, salidas::Vector) -> (Float64, Vector)
+    predicciones_acc_ECM(red::RedNeuronal, entradas::Vector, salidas::Vector) -> (Vector, Float64, Float64)
 
-Calcula las predicciones y el error cuadrático medio (ECM) de la red neuronal,
-devolviendo (ECM, predicciones)
+Calcula las predicciones, el accuracy y el error cuadrático medio (ECM) de la red neuronal,
+devolviendo (predicciones, accuracy, ECM)
 # Arguments:
 - `red::RedNeuronal`: Red neuronal
 - `entradas::Vector`: Valores de entrada de la red
 - `salidas::Vector`: Valores esperados de salida de la red
 
 """
-function predicciones_y_ECM(red::RedNeuronal_pkg.RedNeuronal, entradas::Vector{Vector{Float64}},
+function predicciones_acc_ECM(red::RedNeuronal_pkg.RedNeuronal, entradas::Vector{Vector{Float64}},
                             salidas::Vector{Vector{Float64}})
     predicciones = []
     
     ecm = 0
+    acc = 0
     for i in 1:size(entradas,1)
         atributos = entradas[i]
         clases = salidas[i]
@@ -77,11 +78,13 @@ function predicciones_y_ECM(red::RedNeuronal_pkg.RedNeuronal, entradas::Vector{V
         Capa_pkg.Disparar(last(red.capas))
         prediccion = [neurona.valor_salida for neurona in last(red.capas).neuronas]
         ecm += ECM(clases, prediccion)
+        acc += (prediccion == clases ? 1 : 0) 
         push!(predicciones, prediccion)
     end
     ecm /= size(entradas,1)
+    acc /= size(salidas, 1)
     
-    return ecm, predicciones 
+    return predicciones, acc, ecm 
 end
 
 """
@@ -129,11 +132,11 @@ function main_generico(red::RedNeuronal_pkg.RedNeuronal, entradas_entrenamiento:
                                                                           num_clases, clases, tolerancia)
         end
 
-        ecm_train, _ = predicciones_y_ECM(red, entradas_entrenamiento, salidas_entrenamiento)
-        ecm_test, predicciones_test = predicciones_y_ECM(red, entradas_test, salidas_test)
+        _, acc_train, ecm_train = predicciones_acc_ECM(red, entradas_entrenamiento, salidas_entrenamiento)
+        predicciones_test, acc_test, ecm_test = predicciones_acc_ECM(red, entradas_test, salidas_test)
         println("Época ", epoch)
         println("ECM Train: ", ecm_train, " ECM Test: ", ecm_test)
-
+        println("Accuracy Train: ", acc_train, " Accuracy Test: ", acc_test)
 
         if fin_entrenamiento
             println("Entrenamiento finalizado por convergencia en los pesos.")
@@ -147,7 +150,7 @@ function main_generico(red::RedNeuronal_pkg.RedNeuronal, entradas_entrenamiento:
     end
 
     writedlm(output_file, predicciones_test)
-    
+
     RedNeuronal_pkg.Liberar(red)
 
 end
