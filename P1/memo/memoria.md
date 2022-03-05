@@ -67,11 +67,15 @@ Como el lector habrá podido observar, hay un problema lógico que no está pres
 
 ![](XOR_decision_line.png)
 
-Para solucionar este problema, debemos usar técnicas que sean capaces de separar de formas no lineales las distintas clases. Una alternativa para esto es implementar una red neuronal profunda con al menos una capa oculta con activación no lineal.
+Para solucionar este problema, debemos usar técnicas que sean capaces de separar de formas no lineales las distintas clases. Una alternativa para esto es implementar una red neuronal profunda con al menos una capa oculta con activación no lineal. De hecho, podríamos resolver el problema de XOR combinando las otras tres reglas de decisión obtenidas. Esto es porque 
+$$
+A \oplus B = (A \or B) \and \neg(A \and B),
+$$
+es decir, podemos resolverlo usando OR, AND y NAND.
 
 ### 4.2 Problema real 1
 
-El perceptrón y adaline implementado cuentan con conexiones directas entre las neuronas de entrada y de salida, cuyos pesos se modifican en el entrenamiento. Hay tantas neuronas de entrada como variables tienen los datos (más el sesgo), y tantas neuronas de salida como número de clases queramos predecir. La implementación concreta se encuentra en `Perceptron.jl` y en `Adaline.jl`, y ambos ficheros hacen uso de `utils.jl`. 
+El Perceptrón y Adaline implementados cuentan con conexiones directas entre las neuronas de entrada y de salida, cuyos pesos se modifican en el entrenamiento. Hay tantas neuronas de entrada como variables tienen los datos (más el sesgo), y tantas neuronas de salida como número de clases queramos predecir. La implementación concreta se encuentra en `Perceptron.jl` y en `Adaline.jl`, y ambos ficheros hacen uso de `utils.jl`. 
 
 Es importante notar que durante el entrenamiento del Perceptrón es necesario disparar la última capa, para que la salida pase por la activación correspondiente. En cuanto al Adaline, esto es necesario únicamente al hacer inferencia, ya que el entrenamiento se hace con las salidas sin activar.
 
@@ -90,7 +94,7 @@ Dichas configuraciones consisten en:
 |   ![](../img/ECM_perceptron_problema_real1.png)    |   ![](../img/ECM_adaline_problema_real1.png)    |
 | ![](../img/Accuracy_perceptron_problema_real1.png) | ![](../img/Accuracy_adaline_problema_real1.png) |
 
-Es llamativa como el ECM en Adaline permanece constante tras cierto número de épocas. Creemos que esto se debe a que el algoritmo alcanza un mínimo local de la función de coste, donde el gradiente es cercano $0$. Esto se debe a que la regla de aprendizaje del Adaline minimiza el ECM usando descenso por gradiente, luego si llegamos a un punto donde el gradiente es casi nulo, no habrá apenas actualización de pesos en las iteraciones sucesivas. Este razonamiento se contrasta observando la gráfica del accuracy. El rendimiento a la hora de clasificar es tan elevado desde el principio que es esperable que apenas haya aprendizaje. Observamos que este fenómeno no se produce en el perceptrón, cuyo ECM y accuracy oscila en mayor medida, ya que su regla de aprendizaje no lo minimiza.
+Es llamativo como el ECM en Adaline permanece constante tras cierto número de épocas. Creemos que esto se debe a que el algoritmo alcanza un mínimo local de la función de coste, donde el gradiente es cercano $0$. Esto se debe a que la regla de aprendizaje del Adaline minimiza el ECM usando descenso por gradiente, luego si llegamos a un punto donde el gradiente es casi nulo, no habrá apenas actualización de pesos en las iteraciones sucesivas. Este razonamiento se contrasta observando la gráfica del accuracy. El rendimiento a la hora de clasificar es tan elevado desde el principio que es esperable que apenas haya aprendizaje. Observamos que este fenómeno no se produce en el perceptrón, cuyo ECM y accuracy oscila en mayor medida, ya que su regla de aprendizaje no lo minimiza.
 
 Estudiamos a continuación la influencia que tienen los distintos parámetros sobre el resultado.
 
@@ -112,7 +116,7 @@ En cuanto a la **tasa de aprendizaje**, los resultados son los siguientes:
 | ![](../img/ECM_perceptron_tasa_0.025.png)  | ![](../img/ECM_adaline_tasa_0.1.png)  |
 |  ![](../img/ECM_perceptron_tasa_0.5.png)   | ![](../img/ECM_adaline_tasa_0.5.png)  |
 
-En primer lugar, es importante notar que los valores de las tasas que presentamos en las imágenes no son los mismos para ambos algoritmos. Esto se debe a que cada uno tiene un criterio distinto para dar por finalizado el entrenamiento, en el que la tasa de aprendizaje influye notablemente. Por ejemplo, en el Adaline, con una tolerancia fija, operar con tasas de entrenamiento bajas hace que el aprendizaje pare antes. 
+En primer lugar, es importante notar que los valores de las tasas que presentamos en las imágenes no son los mismos para ambos algoritmos. Esto se debe a que cada uno tiene un criterio distinto para dar por finalizado el entrenamiento, en el que la tasa de aprendizaje influye notablemente. Por ejemplo, en el Adaline, con una tolerancia fija, operar con tasas de entrenamiento bajas hace que el aprendizaje pare antes.
 
 En cuanto a las conclusiones que obtenemos, son las siguientes. En el Perceptrón, cuánto más agresivo se es con la tasa de aprendizaje, mayores oscilaciones encontramos durante el entrenamiento. En el Adaline, si la tasa de aprendizaje es excesiva, el algoritmo se mueve con pasos demasiados grandes por el espacio de soluciones y no aprende.
 
@@ -126,7 +130,7 @@ Analicemos ahora la influencia del **porcentaje** entre entrenamiento y test:
 
 En el caso del Perceptrón observamos como claramente el aprendizaje mejora con creces según usamos un mayor porcentaje del conjunto de entrenamiento. 
 
-Nuestros experimentos con la **tolerancia** nos han permitido concluir lo siguiente. Para valores muy pequeños de tolerancia, como el modelo deja de aprender pero el gradiente no es totalmente nulo (ed, hay actualización siempre de los pesos), el entrenamiento no acaba hasta que se alcanza el número máximo de épocas. Sin embargo, como el valor de estas actualizaciones se estabiliza muy rápidamente, no hay término medio. Esto es, no hay un valor de tolerancia que haga que el algoritmo se pare entre las primeras épocas y la última. No se han incluido gráficos porque, como hemos comentado, el comportamiento observado no varía entre valores. **TODO!!!**
+Nuestros experimentos con la **tolerancia** nos han permitido concluir lo siguiente. Para valores muy pequeños de tolerancia, como el modelo deja de aprender pero el gradiente no es totalmente nulo (ed, hay actualización siempre de los pesos), el entrenamiento no acaba hasta que se alcanza el número máximo de épocas. Sin embargo, como el valor de estas actualizaciones se estabiliza muy rápidamente, no hay término medio. Esto es, no hay un valor de tolerancia que haga que el algoritmo se pare entre las primeras épocas y la última. No se han incluido gráficos porque, como hemos comentado, el comportamiento observado no varía entre valores.
 
 Modificar el **umbral** del perceptrón hace que se prediga en mayor medida la clase "intermedia" $0$. Con esto, es de esperar que a mayor umbral, más estabilidad en el ECM observado, ya que la mayoría de predicciones permanecerán estables en la clase $0$ e incurrirán siempre en el mismo error. Veamos los resultados observados:
 
@@ -156,6 +160,6 @@ Presentamos a continuación los resultados para el archivo `problema_real2.txt`.
 |   ![](../img/ECM_perceptron_problema_real2.png)    |   ![](../img/ECM_adaline_problema_real2.png)    |
 | ![](../img/Accuracy_perceptron_problema_real2.png) | ![](../img/Accuracy_adaline_problema_real2.png) |
 
-A diferencia del problema real 1, en este caso las redes no aprenden tan rápidamente de los datos. En el problema real 1, con un bajo número de épocas se alcanzaban valores de error cuadrático medio muy bajos y de accuracy muy altos, provocando que en el caso del Adaline, esos valores permaneciesen constantes en casi todos los experimentos. En este problema, la red no se ajusta tan rápidamente a los datos de entrenamiento, provocando que se observe otro fenómeno diferente, en el que el ECM va disminuyendo de manera progresiva hasta alcanzar un mínimo local. Dicho de otra manera, las gráficas del problema real 1 del Adaline tienen un comportamiento similar a lo que sucede en este problema a partir de la época 40.
+A diferencia del problema real 1, en este caso las redes no aprenden tan rápidamente de los datos. En el problema real 1, con un bajo número de épocas se alcanzaban valores de ECM muy bajos y de accuracy muy altos, provocando que en el caso del Adaline, esos valores permaneciesen constantes en casi todos los experimentos. En este problema, la red no se ajusta tan rápidamente a los datos de entrenamiento, provocando que se observe otro fenómeno diferente, en el que el ECM va disminuyendo de manera progresiva hasta alcanzar un mínimo local. Dicho de otra manera, las gráficas del problema real 1 del Adaline tienen un comportamiento similar a lo que sucede en este problema a partir de la época 30.
 
 En el caso del Perceptrón se observa una vez más un mayor número de oscilaciones en el proceso de entrenamiento. También cabe destacar que, aunque el Perceptrón alcance valores más bajos de ECM que el Adaline, su accuracy a la hora de predecir es menor. Esto se debe a que las predicciones que se clasifican en la clase 0 en el caso del Perceptrón tienen un efecto menor en el ECM que un dato clasificado en la clase contraria, pero siempre será considerado como clasificado erróneamente por el accuracy.
