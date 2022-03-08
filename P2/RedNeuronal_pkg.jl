@@ -158,12 +158,15 @@ function Backpropagation(red::RedNeuronal, clases_verdaderas::Vector{Float64},
         push!(deltas, delta)
     end
 
-    for capa in reverse(red.capas[1:size(red.capas, 1) - 1])
+    n_capas = size(red.capas, 1)
+
+    for (capa_index, capa) in enumerate(reverse(red.capas[1:n_capas - 1]))
        deltas_capa = Vector{Float64}()
        salidas_capa = []
         for neurona in capa.neuronas
             push!(salidas_capa, neurona.valor_salida)
-            if neurona.tipo == Neurona_pkg.Sesgo
+            # No es necesario calcular delta para Sesgo ni para primera capa de la red
+            if neurona.tipo == Neurona_pkg.Sesgo || capa_index == n_capas - 1
                 continue
             end
             pesos_neurona = []
@@ -176,6 +179,7 @@ function Backpropagation(red::RedNeuronal, clases_verdaderas::Vector{Float64},
         delta_pesos = tasa_aprendizaje .* (salidas_capa * deltas')
         for (neurona_index, neurona) in enumerate(capa.neuronas)
             for (conexion_index, conexion) in enumerate(neurona.conexiones)
+                conexion.peso_anterior = conexion.peso
                 conexion.peso += delta_pesos[neurona_index, conexion_index]
             end
         end
