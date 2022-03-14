@@ -81,8 +81,9 @@ Propaga todas las capas de la red neuronal
 
 """
 function Propagar(red_neuronal::RedNeuronal)
-    for capa in red_neuronal.capas
-        Capa_pkg.Propagar(capa)
+    for index_capa in 1:(size(red_neuronal.capas,1)-1)
+        Capa_pkg.Propagar(red_neuronal.capas[index_capa])
+        Capa_pkg.Disparar(red_neuronal.capas[index_capa + 1])
     end
 end
 
@@ -103,10 +104,19 @@ function CrearRedAleatoria(configuracion::Vector{Int64}, peso_min::Float64, peso
     for (capa_index, n_neuronas) in enumerate(configuracion)
         capa = Capa_pkg.Crear()
 
-        for i in 1:n_neuronas
-            neurona = Neurona_pkg.Crear(0.0, Neurona_pkg.Sigmoide)
-            Capa_pkg.Añadir(capa, neurona)
+        # La primera capa no tiene función de activación
+        if capa_index == 1
+            for i in 1:n_neuronas
+                neurona = Neurona_pkg.Crear(0.0, Neurona_pkg.Directa)
+                Capa_pkg.Añadir(capa, neurona)
+            end
+        else
+            for i in 1:n_neuronas
+                neurona = Neurona_pkg.Crear(0.0, Neurona_pkg.Sigmoide)
+                Capa_pkg.Añadir(capa, neurona)
+            end
         end
+
         # La última capa no tiene sesgo
         if capa_index != n_capas
             Capa_pkg.Añadir(capa, Neurona_pkg.Crear(1.0, Neurona_pkg.Sesgo))
@@ -141,10 +151,11 @@ function Feedforward(red::RedNeuronal, valores_entrada::Vector{Float64})
     for i in 1:size(valores_entrada, 1)
         Neurona_pkg.Inicializar(capa_entrada.neuronas[i], valores_entrada[i])
     end
-    Disparar(red)
+    Capa_pkg.Disparar(capa_entrada)
     Inicializar(red)
     Propagar(red)
-    Capa_pkg.Disparar(last(red.capas))
+    # Disparar(red) TODO: crear Propagar_y_disparar
+    #Capa_pkg.Disparar(last(red.capas))
 end
 
 function Backpropagation(red::RedNeuronal, clases_verdaderas::Vector{Float64},

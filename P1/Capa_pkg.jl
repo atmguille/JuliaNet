@@ -90,7 +90,9 @@ Conecta todas las neuronas entre las capas indicadas, con pesos aleatorios entre
 """
 function Conectar(capa::Capa, capa_siguiente::Capa, peso_min::Float64, peso_max::Float64)
     for neurona_destino in capa_siguiente.neuronas
-        Conectar(capa, neurona_destino, peso_min, peso_max)
+        if neurona_destino.tipo != Neurona_pkg.Sesgo
+            Conectar(capa, neurona_destino, peso_min, peso_max)
+        end
     end
 end
 

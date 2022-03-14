@@ -15,13 +15,13 @@ function parse_commandline()
 
     @add_arg_table s begin
         "--input_file"
-            help = "Fichero con los valores de entrada para la red frio-calor."
+            help = "Fichero con los valores de entrada para entrenar y probar la red (modos 1 y 2). En el modo 3, únicamente es el fichero de entrenamiento."
             required = true
         "--output_file"
-            help = "Fichero en el que se van a almacenar los valores de la neurona en cada instante de tiempo."
+            help = "Fichero en el que se van a almacenar las predicciones del conjunto de testS."
             required = true
         "--tasa_aprendizaje"
-            help = "Tasa de aprendizaje del adaline."
+            help = "Tasa de aprendizaje del perceptrón multicapa."
             arg_type = Float64
             required = true
         "--epocas"
@@ -83,8 +83,7 @@ function predicciones_acc_ECM(red::RedNeuronal_pkg.RedNeuronal, entradas::Vector
         _, max_index = findmax(prediccion)
         prediccion_clase[max_index] = 1.
         acc += (prediccion_clase == clases ? 1 : 0)
-        push!(predicciones, prediccion_clase)
-        println(predicciones)
+        push!(predicciones, copy(prediccion_clase))
         prediccion_clase[max_index] = -1.
     end
     ecm /= size(entradas,1)
@@ -117,7 +116,7 @@ function main()
     num_clases = size(salidas_entrenamiento[1], 1)
 
     # Inicializamos la red
-    red = RedNeuronal_pkg.CrearRedAleatoria([num_atributos, 10, num_clases], -1.0, 1.0)
+    red = RedNeuronal_pkg.CrearRedAleatoria([num_atributos, 2, num_clases], -0.5, 0.5)
 
     predicciones_test = []
 
@@ -135,7 +134,6 @@ function main()
         println("Época ", epoch)
         println("ECM Train: ", ecm_train, " ECM Test: ", ecm_test)
         println("Accuracy Train: ", acc_train, " Accuracy Test: ", acc_test)
-
     end
 
     writedlm(output_file, predicciones_test)
