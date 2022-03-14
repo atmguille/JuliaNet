@@ -5,10 +5,13 @@ using .Neurona_pkg
 using .Capa_pkg
 using .RedNeuronal_pkg
 
-include("LecturaDatos.jl")
-
 using ArgParse
 using DelimitedFiles
+using Statistics
+
+include("LecturaDatos.jl")
+include("utils.jl")
+
 
 function parse_commandline()
     s = ArgParseSettings()
@@ -37,6 +40,15 @@ function parse_commandline()
             arg_type = Float64
         "--input_test_file"
             help = "Fichero con los valores de entrada para probar la red. Exclusivo del modo 3."
+        "--red_config"
+            help = "Lista con la configuración de las capas ocultas de la red. Por ejemplo,
+                    '[3, 2, 1]' indica que la red tendrá 3 capas ocultas, la primera con 3 neuronas,
+                    la segunda con 2 neuronas y la tercera con 1."
+            arg_type = Vector{Int64}
+            required = true
+        "--normalizar"
+            help = "Si se indica, se normalizan los datos de entrada."
+            nargs = 0
     end
 
     return parse_args(s)
@@ -110,13 +122,26 @@ function main()
     output_file = parsed_args["output_file"]
     tasa_aprendizaje = parsed_args["tasa_aprendizaje"]
     epocas = parsed_args["epocas"]
+    red_config = parsed_args["red_config"]
+    normalizar = parsed_args["normalizar"]
 
     # Las entradas ya contienen la constante del bias, luego restamos 1 para el número de atributos
     num_atributos = size(entradas_entrenamiento[1], 1) - 1
     num_clases = size(salidas_entrenamiento[1], 1)
 
     # Inicializamos la red
-    red = RedNeuronal_pkg.CrearRedAleatoria([num_atributos, 2, num_clases], -0.5, 0.5)
+    red = RedNeuronal_pkg.CrearRedAleatoria([num_atributos; red_config; num_clases], -0.5, 0.5)
+    # Normalizamos los datos de entrada
+    if normalizar
+        # La función mean y std esperan un tipo distinto al que procesamos. Lo transformamos con reduce
+        media_entrenamiento = mean(reduce(hcat, entradas_entrenamiento)', dims=1)
+        desv_entrenamiento = std(reduce(hcat, entradas_entrenamiento)', dims=1)
+        # Al incluir los datos el sesgo, debemos mantenerlo a 1 pese a normalizar
+        media_entrenamiento = [media_entrenamiento[1:num_atributos]; 0.]
+        desv_entrenamiento = [desv_entrenamiento[1:num_atributos]; 1.]
+        entradas_entrenamiento = map((x) -> (x-media_entrenamiento) ./ desv_entrenamiento, entradas_entrenamiento)
+        entradas_test = map((x) -> (x-media_entrenamiento) ./ desv_entrenamiento, entradas_test)
+    end
 
     predicciones_test = []
 
