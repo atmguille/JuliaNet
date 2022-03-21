@@ -1,19 +1,26 @@
 import matplotlib.pyplot as plt
 
-ECM_TRAIN = 'ecm_train_perceptron_prob1.txt'
-ECM_TEST = 'ecm_test_perceptron_prob1.txt'
-MODEL_NAME = 'ECM_perceptron_problema_real1'
+PROBLEMA = 'problema_real4'
+PARAMS = '0.01_5_500_norm'
+keywords = [('acc', 'Accuracy'), ('ecm', 'ECM')]
 
-with open(ECM_TRAIN, 'r') as f:
-    ecm_train = list(map(float, f.readlines()))
+for abr, title in keywords:
+    BASE_FILENAME = PROBLEMA + '/' + PROBLEMA + '_' + PARAMS + '_' + abr
+    FILENAME_TRAIN = BASE_FILENAME + '_train.txt'
+    FILENAME_TEST = BASE_FILENAME + '_test.txt'
+    MODEL_NAME = title + '_' + PROBLEMA
 
-with open(ECM_TEST, 'r') as f:
-    ecm_test = list(map(float, f.readlines()))
+    with open(FILENAME_TRAIN, 'r') as f:
+        train = list(map(float, f.readlines()))
 
-plt.plot(ecm_train, label='train')
-plt.plot(ecm_test, label='test')
-plt.title(MODEL_NAME)
-plt.xlabel('epoch')
-plt.ylabel('ECM')
-plt.legend()
-plt.savefig(f'{MODEL_NAME}.png')
+    with open(FILENAME_TEST, 'r') as f:
+        test = list(map(float, f.readlines()))
+
+    plt.figure()
+    plt.plot(train, label='train')
+    plt.plot(test, label='test')
+    plt.title(MODEL_NAME)
+    plt.xlabel('epoch')
+    plt.ylabel(title)
+    plt.legend()
+    plt.savefig(f'{MODEL_NAME}_{PARAMS}.png')

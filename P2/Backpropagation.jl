@@ -20,8 +20,8 @@ function parse_commandline()
         "--input_file"
             help = "Fichero con los valores de entrada para entrenar y probar la red (modos 1 y 2). En el modo 3, únicamente es el fichero de entrenamiento."
             required = true
-        "--output_file"
-            help = "Fichero en el que se van a almacenar las predicciones del conjunto de testS."
+        "--output_name"
+            help = "Nombre base para los ficheros de salida en el que se van a almacenar las predicciones, ecm y tasa de aciertos."
             required = true
         "--tasa_aprendizaje"
             help = "Tasa de aprendizaje del perceptrón multicapa."
@@ -36,7 +36,7 @@ function parse_commandline()
             arg_type = Int64
             required = true
         "--porcentaje"
-            help = "Porcentaje de datos del fichero utilizados en el entrenamiento. Exclusivo del modo 2."
+            help = "Porcentaje de datos del fichero utilizados en el entrenamiento. Exclusivo del modo 1."
             arg_type = Float64
         "--input_test_file"
             help = "Fichero con los valores de entrada para probar la red. Exclusivo del modo 3."
@@ -97,7 +97,7 @@ function predicciones_acc_ECM(red::RedNeuronal_pkg.RedNeuronal, entradas::Vector
         # La clase predicha es la neurona que más se ha activado
         _, index_pred = findmax(prediccion)
         prediccion_clase[index_pred] = 1.
-        matriz_confusion[index_real, index_pred] += 1
+        matriz_confusion[index_pred, index_real] += 1
         push!(predicciones, copy(prediccion_clase))
         prediccion_clase[index_pred] = -1.
     end
@@ -122,7 +122,7 @@ function main()
 
     entradas_entrenamiento, salidas_entrenamiento, entradas_test, salidas_test = ret
 
-    output_file = parsed_args["output_file"]
+    output_name = parsed_args["output_name"]
     tasa_aprendizaje = parsed_args["tasa_aprendizaje"]
     epocas = parsed_args["epocas"]
     red_config = parsed_args["red_config"]
@@ -147,6 +147,10 @@ function main()
     end
 
     predicciones_test = []
+    array_ecm_train = []
+    array_acc_train = []
+    array_ecm_test = []
+    array_acc_test = []
 
     for epoch in 1:epocas
         for i in 1:size(entradas_entrenamiento, 1)
@@ -163,9 +167,17 @@ function main()
         println("ECM Train: ", ecm_train, " ECM Test: ", ecm_test)
         println("Accuracy Train: ", acc_train, " Accuracy Test: ", acc_test)
         println("Matriz Confusión Train: ", mat_conf_train, " Matriz Confusión Test: ", mat_conf_test)
+        push!(array_ecm_train, ecm_train)
+        push!(array_ecm_test, ecm_test)
+        push!(array_acc_train, acc_train)
+        push!(array_acc_test, acc_test)
     end
 
-    writedlm(output_file, predicciones_test)
+    writedlm(output_name * "_pred_test.txt", predicciones_test)
+    writedlm(output_name * "_ecm_train.txt", array_ecm_train)
+    writedlm(output_name * "_ecm_test.txt", array_ecm_test)
+    writedlm(output_name * "_acc_train.txt", array_acc_train)
+    writedlm(output_name * "_acc_test.txt", array_acc_test)
 
     RedNeuronal_pkg.Liberar(red)
 
