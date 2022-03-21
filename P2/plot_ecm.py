@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
-PROBLEMA = 'problema_real4'
-PARAMS = '0.01_5_500_norm'
+PROBLEMA = 'problema_real6'
+PARAMS = '0.1_20_5000_norm'
 keywords = [('acc', 'Accuracy'), ('ecm', 'ECM')]
 
 for abr, title in keywords:
