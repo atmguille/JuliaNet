@@ -42,7 +42,7 @@ function parse_commandline()
             help = "Fichero con los valores de entrada para probar la red. Exclusivo del modo 3."
         "--red_config"
             help = "Lista con la configuración de las capas ocultas de la red. Por ejemplo,
-                    '[3, 2, 1]' indica que la red tendrá 3 capas ocultas, la primera con 3 neuronas,
+                    '[3,2,1]' indica que la red tendrá 3 capas ocultas, la primera con 3 neuronas,
                     la segunda con 2 neuronas y la tercera con 1."
             arg_type = Vector{Int64}
             required = true
@@ -70,8 +70,8 @@ end
 """
     predicciones_acc_ECM(red::RedNeuronal, entradas::Vector, salidas::Vector) -> (Vector, Float64, Float64)
 
-Calcula las predicciones, el accuracy y el error cuadrático medio (ECM) de la red neuronal,
-devolviendo (predicciones, accuracy, ECM)
+Calcula las predicciones, el accuracy, el error cuadrático medio (ECM) y la matriz de confusión de la red neuronal,
+devolviendo (predicciones, accuracy, ECM, matriz_confusion)
 # Arguments:
 - `red::RedNeuronal`: Red neuronal
 - `entradas::Vector`: Valores de entrada de la red
@@ -81,27 +81,30 @@ devolviendo (predicciones, accuracy, ECM)
 function predicciones_acc_ECM(red::RedNeuronal_pkg.RedNeuronal, entradas::Vector{Vector{Float64}},
                               salidas::Vector{Vector{Float64}})
     predicciones = []
-    prediccion_clase = repeat([-1.], size(salidas[1], 1))
+    n_entradas = size(entradas, 1)
+    n_clases = size(salidas[1], 1)
+    prediccion_clase = repeat([-1.], n_clases)
     ecm = 0
-    acc = 0
+    matriz_confusion = zeros(Int64, (n_clases, n_clases))
 
-    for i in 1:size(entradas,1)
+    for i in 1:n_entradas
         atributos = entradas[i]
         clases = salidas[i]
         RedNeuronal_pkg.Feedforward(red, atributos)
         prediccion = [neurona.valor_salida for neurona in last(red.capas).neuronas]
         ecm += ECM(clases, prediccion)
+        _, index_real = findmax(clases)
         # La clase predicha es la neurona que más se ha activado
-        _, max_index = findmax(prediccion)
-        prediccion_clase[max_index] = 1.
-        acc += (prediccion_clase == clases ? 1 : 0)
+        _, index_pred = findmax(prediccion)
+        prediccion_clase[index_pred] = 1.
+        matriz_confusion[index_real, index_pred] += 1
         push!(predicciones, copy(prediccion_clase))
-        prediccion_clase[max_index] = -1.
+        prediccion_clase[index_pred] = -1.
     end
-    ecm /= size(entradas,1)
-    acc /= size(salidas, 1)
+    ecm /= n_entradas
+    acc = sum(matriz_confusion[i, i] for i in 1:size(matriz_confusion, 1)) / n_entradas
 
-    return predicciones, acc, ecm
+    return predicciones, acc, ecm, matriz_confusion
 end
 
 
@@ -154,11 +157,12 @@ function main()
             RedNeuronal_pkg.Backpropagation(red, clases, tasa_aprendizaje)
         end
 
-        _, acc_train, ecm_train = predicciones_acc_ECM(red, entradas_entrenamiento, salidas_entrenamiento)
-        predicciones_test, acc_test, ecm_test = predicciones_acc_ECM(red, entradas_test, salidas_test)
+        _, acc_train, ecm_train, mat_conf_train = predicciones_acc_ECM(red, entradas_entrenamiento, salidas_entrenamiento)
+        predicciones_test, acc_test, ecm_test, mat_conf_test = predicciones_acc_ECM(red, entradas_test, salidas_test)
         println("Época ", epoch)
         println("ECM Train: ", ecm_train, " ECM Test: ", ecm_test)
         println("Accuracy Train: ", acc_train, " Accuracy Test: ", acc_test)
+        println("Matriz Confusión Train: ", mat_conf_train, " Matriz Confusión Test: ", mat_conf_test)
     end
 
     writedlm(output_file, predicciones_test)
