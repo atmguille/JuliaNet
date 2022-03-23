@@ -73,7 +73,7 @@ Como se indica en el enunciado, para los problemas $4$ y $6$ no es posible encon
 
 |                      Problema 4                       |                      Problema 6                       |
 | :---------------------------------------------------: | :---------------------------------------------------: |
-| ![](problema_real4/ECM_problema_real4_0.01_2_500.png) | ![](problema_real6/ECM_problema_real6_0.01_2_500.png) |
+| ![](problema_real4/ECM_problema_real4_0.01_2_500.png) | ![](problema_real6/ECM_problema_real6_0.1_2_1000.png) |
 
 Para determinar la causa de que la red no sea capaz de aprender, hemos observado la distribución de las variables de entrada. Creemos que el *boxplot* es una buena forma de agrupar la información que queremos observar y de poder ver diferencias entre las distintas variables. Además, incluimos la gráfica para otros problemas sí resolubles (el $1$ y el $2$) para comprobar porqué el $4$ y el $6$ no lo son.
 
@@ -113,6 +113,10 @@ Además, hemos obtenido las matrices de confusión para esta configuración:
 
 
 
-|  LR  | Épocas | Neuronas |                             ECM                             |                           Accuracy                           |
-| :--: | :----: | :------: | :---------------------------------------------------------: | :----------------------------------------------------------: |
-| 0.1  |  5000  |    20    | ![](problema_real6/ECM_problema_real6_0.1_20_5000_norm.png) | ![](problema_real6/Accuracy_problema_real6_0.1_20_5000_norm.png) |
+|  LR  | Épocas | Neuronas  |                             ECM                              |                           Accuracy                           |
+| :--: | :----: | :-------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
+| 0.1  |  1000  |     2     |  ![](problema_real6/ECM_problema_real6_0.1_2_1000_norm.png)  | ![](problema_real6/Accuracy_problema_real6_0.1_2_1000_norm.png) |
+| 0.1  |  1000  |     5     |  ![](problema_real6/ECM_problema_real6_0.1_5_1000_norm.png)  | ![](problema_real6/Accuracy_problema_real6_0.1_5_1000_norm.png) |
+| 0.1  |  1000  |    10     | ![](problema_real6/ECM_problema_real6_0.1_10_1000_norm.png)  | ![](problema_real6/Accuracy_problema_real6_0.1_10_1000_norm.png) |
+| 0.1  |  1000  | [10, 10]  | ![](problema_real6/ECM_problema_real6_0.1_10-10_1000_norm.png) | ![](problema_real6/Accuracy_problema_real6_0.1_10-10_1000_norm.png) |
+| 0.1  |  1000  | [5, 5, 5] | ![](problema_real6/ECM_problema_real6_0.1_5-5-5_1000_norm.png) | ![](problema_real6/Accuracy_problema_real6_0.1_5-5-5_1000_norm.png) |
