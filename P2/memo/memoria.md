@@ -8,7 +8,7 @@ a
 
 ## 2. Problemas reales
 
-En esta sección, presentamos los resultados obtenidos para los problemas $1$, $2$, $3$ y $5$ para distintas configuraciones de la red.
+En esta sección, presentamos los resultados obtenidos para los problemas $1$, $2$, $3$ y $5$ para distintas configuraciones de la red. Todas las pruebas han sido ejecutadas en modo $1$ para contar con un conjunto de validación, que en todos los casos ha sido del $70\%$.
 
 ### Problema real 1
 
@@ -23,19 +23,28 @@ A la luz de los resultados, este problema parece el más sencillo de resolver. C
 | :--------------------------------------------------------: | :-------------------------------------------------------: |
 | ![](problema_real1/Matriz_problema_real1_0.01_2_train.png) | ![](problema_real1/Matriz_problema_real1_0.01_2_test.png) |
 
-Tanto en el conjunto de entrenamiento como en el de validación  observamos comportamientos similares, con un gran número de aciertos y los falsos positivos mayores que los falsos negativos en ambos casos, posiblemente porque la clase $0$ está algo sobrerrepresentada.
+Tanto en el conjunto de entrenamiento como en el de validación observamos comportamientos similares, con un gran número de aciertos y los falsos positivos mayores que los falsos negativos en ambos casos.
 
 ### Problema real 2
 
+Como en la sección anterior hemos concluido que el mejor LR era $0.01$, las pruebas a continuación se harán fijando este valor.
 
+En primer lugar, probamos a aumentar el número de épocas, concluyendo que, si bien mejora ligeramente aumentando el número de épocas, la mejora nos es sustancial. Por ello, las pruebas a continuación se harán con $500$ épocas.
 
 |  LR  | Épocas | Neuronas |                          ECM                           |                          Accuracy                           |
 | :--: | :----: | :------: | :----------------------------------------------------: | :---------------------------------------------------------: |
 | 0.01 |  500   |    2     | ![](problema_real2/ECM_problema_real2_0.01_2_500.png)  | ![](problema_real2/Accuracy_problema_real2_0.01_2_500.png)  |
 | 0.01 |  1000  |    2     | ![](problema_real2/ECM_problema_real2_0.01_2_1000.png) | ![](problema_real2/Accuracy_problema_real2_0.01_2_1000.png) |
+
+Como vemos en la siguiente tabla, según aumentamos el número de neuronas el ECM final de entrenamiento disminuye. Sin embargo, aumentar en exceso el número de neuronas también empeora la capacidad de generalización, tal y como se puede observar en la ejecución con $20$ neuronas. Concluimos que el mejor modelo es el de $10$ neuronas, un número lo suficientemente alto para aprender correctamente, pero lo suficientemente pequeño para no sobre-aprender.
+
+|  LR  | Épocas | Neuronas |                          ECM                           |                          Accuracy                           |
+| :--: | :----: | :------: | :----------------------------------------------------: | :---------------------------------------------------------: |
 | 0.01 |  500   |    5     | ![](problema_real2/ECM_problema_real2_0.01_5_500.png)  | ![](problema_real2/Accuracy_problema_real2_0.01_5_500.png)  |
 | 0.01 |  500   |    10    | ![](problema_real2/ECM_problema_real2_0.01_10_500.png) | ![](problema_real2/Accuracy_problema_real2_0.01_10_500.png) |
 | 0.01 |  500   |    20    | ![](problema_real2/ECM_problema_real2_0.01_20_500.png) | ![](problema_real2/Accuracy_problema_real2_0.01_20_500.png) |
+
+A continuación, presentamos la matriz de confusión para el modelo seleccionado ($10$ neuronas). Es evidente que tenemos más falsos positivos que falsos negativos, posiblemente debido a que la clase $1$ es claramente mayoritaria. Por esta razón, el modelo tenderá a predecir en mayor medida la clase $1$, y quizás no aprenda correctamente las características intrínsecas de la clase $0$.
 
 |                 Matriz de confusión (train)                  |                  Matriz de confusión (val)                   |
 | :----------------------------------------------------------: | :----------------------------------------------------------: |
@@ -43,17 +52,23 @@ Tanto en el conjunto de entrenamiento como en el de validación  observamos comp
 
 ### Problema real 3
 
+En la siguiente tabla observamos los resultados para distintas configuraciones sobre los datos del problema $3$. Una vez más, el número intermedio de neuronas ($5$) es el que nos da mejores resultados en cuánto a error y generalización.
+
 |  LR  | Épocas | Neuronas |                          ECM                           |                          Accuracy                           |
 | :--: | :----: | :------: | :----------------------------------------------------: | :---------------------------------------------------------: |
 | 0.01 |  500   |    2     | ![](problema_real3/ECM_problema_real3_0.01_2_500.png)  | ![](problema_real3/Accuracy_problema_real3_0.01_2_500.png)  |
 | 0.01 |  500   |    5     | ![](problema_real3/ECM_problema_real3_0.01_5_500.png)  | ![](problema_real3/Accuracy_problema_real3_0.01_5_500.png)  |
 | 0.01 |  500   |    10    | ![](problema_real3/ECM_problema_real3_0.01_10_500.png) | ![](problema_real3/Accuracy_problema_real3_0.01_10_500.png) |
 
+Una vez más, presentamos la matriz de confusión del modelo elegido. En este caso, la matriz es $3 \times 3$, ya que los datos cuentan con $3$ clases a predecir. Observamos que la clasificación es casi perfecta, y únicamente presenta un número bajo de fallos en la clase $1$, para la que el modelo predice la clase $2$.
+
 |                 Matriz de confusión (train)                  |                  Matriz de confusión (val)                   |
 | :----------------------------------------------------------: | :----------------------------------------------------------: |
 | ![](problema_real3/Matriz_problema_real3_0.01_5_500_train.png) | ![](problema_real3/Matriz_problema_real3_0.01_5_500_test.png) |
 
 ### Problema real 5
+
+De nuevo, presentamos los resultados para $2$, $5$ y $10$ neuronas. En este caso, los resultados entre $5$ y $10$ neuronas son muy parejos, aunque parecen muy ligeramente superiores para $10$ neuronas. Por esto, consideramos que el mejor resultado 
 
 |  LR  | Épocas | Neuronas |                          ECM                           |                          Accuracy                           |
 | :--: | :----: | :------: | :----------------------------------------------------: | :---------------------------------------------------------: |
@@ -64,8 +79,6 @@ Tanto en el conjunto de entrenamiento como en el de validación  observamos comp
 |                 Matriz de confusión (train)                  |                  Matriz de confusión (val)                   |
 | :----------------------------------------------------------: | :----------------------------------------------------------: |
 | ![](problema_real5/Matriz_problema_real5_0.01_10_500_train.png) | ![](problema_real5/Matriz_problema_real5_0.01_10_500_test.png) |
-
-
 
 ## 3. Problemas reales y normalización
 
@@ -85,12 +98,15 @@ En la figura anterior podemos ver con claridad la razón que causa que los prime
 
 Como solución, procedemos a normalizar los valores de entrada como sigue:
 $$
-X_{train} =
+X_{train} = \frac{X_{train} - \mu_{train}}{\sigma_{train}}\\
+X_{test} = \frac{X_{test} - \mu_{train}}{\sigma_{train}},
 $$
+
+es decir, las entradas del conjunto de test son normalizadas con la media y la desviación del conjunto de entrenamiento.
 
 ### Problema real 4 
 
-Comprobamos ahora que la normalización 
+Comprobamos ahora que la normalización es efectiva en el problema $4$. En la siguiente tabla observamos los resultados para $2$ y $5$ neuronas, muy superiores a los que hemos visto unas líneas más arriba.
 
 |  LR  | Épocas | Neuronas |                            ECM                             |                           Accuracy                           |
 | :--: | :----: | :------: | :--------------------------------------------------------: | :----------------------------------------------------------: |
@@ -118,5 +134,6 @@ Además, hemos obtenido las matrices de confusión para esta configuración:
 | 0.1  |  1000  |     2     |  ![](problema_real6/ECM_problema_real6_0.1_2_1000_norm.png)  | ![](problema_real6/Accuracy_problema_real6_0.1_2_1000_norm.png) |
 | 0.1  |  1000  |     5     |  ![](problema_real6/ECM_problema_real6_0.1_5_1000_norm.png)  | ![](problema_real6/Accuracy_problema_real6_0.1_5_1000_norm.png) |
 | 0.1  |  1000  |    10     | ![](problema_real6/ECM_problema_real6_0.1_10_1000_norm.png)  | ![](problema_real6/Accuracy_problema_real6_0.1_10_1000_norm.png) |
+| 0.1  |  1000  |    20     | ![](problema_real6/ECM_problema_real6_0.1_20_1000_norm.png)  | ![](problema_real6/Accuracy_problema_real6_0.1_20_1000_norm.png) |
 | 0.1  |  1000  | [10, 10]  | ![](problema_real6/ECM_problema_real6_0.1_10-10_1000_norm.png) | ![](problema_real6/Accuracy_problema_real6_0.1_10-10_1000_norm.png) |
 | 0.1  |  1000  | [5, 5, 5] | ![](problema_real6/ECM_problema_real6_0.1_5-5-5_1000_norm.png) | ![](problema_real6/Accuracy_problema_real6_0.1_5-5-5_1000_norm.png) |
