@@ -2,13 +2,13 @@ import seaborn as sn
 import pandas as pd
 import matplotlib.pyplot as plt
 
-problem_name = "Matriz_problema_real6_0.1_20_5000_norm"
+problem_name = "Matriz_problema_real6_0.1_10-10_1000_norm"
 
-matrix_train = [[5173, 885],
-                [575, 3853]]
+matrix_train = [[4974, 931],
+                [836, 3745]]
 
-matrix_test = [[2175, 420],
-               [334, 1565]]
+matrix_test = [[2016, 456],
+               [431, 1591]]
 
 df_cm = pd.DataFrame(matrix_train, ['pred_'+str(i) for i in range(len(matrix_train))], ['real_'+str(i) for i in range(len(matrix_train))])
 plt.figure(figsize=(5,5))

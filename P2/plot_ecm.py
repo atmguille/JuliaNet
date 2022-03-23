@@ -1,11 +1,11 @@
 import matplotlib.pyplot as plt
 
 PROBLEMA = 'problema_real6'
-PARAMS = '0.1_20_5000_norm'
+PARAMS = '0.1_10-10_1000_norm'
 keywords = [('acc', 'Accuracy'), ('ecm', 'ECM')]
 
 for abr, title in keywords:
-    BASE_FILENAME = PROBLEMA + '/' + PROBLEMA + '_' + PARAMS + '_' + abr
+    BASE_FILENAME = 'memo/' + PROBLEMA + '/' + PROBLEMA + '_' + PARAMS + '_' + abr
     FILENAME_TRAIN = BASE_FILENAME + '_train.txt'
     FILENAME_TEST = BASE_FILENAME + '_test.txt'
     MODEL_NAME = title + '_' + PROBLEMA
