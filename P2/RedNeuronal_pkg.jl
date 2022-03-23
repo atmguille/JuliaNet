@@ -81,6 +81,13 @@ Propaga todas las capas de la red neuronal
 
 """
 function Propagar(red_neuronal::RedNeuronal)
+    for capa in red_neuronal.capas
+        Capa_pkg.Propagar(capa)
+    end
+end
+
+
+function Propagar_y_Disparar(red_neuronal::RedNeuronal)
     for index_capa in 1:(size(red_neuronal.capas,1)-1)
         Capa_pkg.Propagar(red_neuronal.capas[index_capa])
         Capa_pkg.Disparar(red_neuronal.capas[index_capa + 1])
@@ -153,9 +160,7 @@ function Feedforward(red::RedNeuronal, valores_entrada::Vector{Float64})
     end
     Capa_pkg.Disparar(capa_entrada)
     Inicializar(red)
-    Propagar(red)
-    # Disparar(red) TODO: crear Propagar_y_disparar
-    #Capa_pkg.Disparar(last(red.capas))
+    Propagar_y_Disparar(red)
 end
 
 function Backpropagation(red::RedNeuronal, clases_verdaderas::Vector{Float64},
