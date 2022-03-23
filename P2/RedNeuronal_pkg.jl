@@ -86,7 +86,14 @@ function Propagar(red_neuronal::RedNeuronal)
     end
 end
 
+"""
+    Propagar_y_Disparar(red_neuronal::RedNeuronal)
 
+Propaga y dispara sucesivamente todas las capas de la red neuronal
+# Arguments:
+- `red_neuronal::RedNeuronal`: Red neuronal a propagar y disparar
+
+"""
 function Propagar_y_Disparar(red_neuronal::RedNeuronal)
     for index_capa in 1:(size(red_neuronal.capas,1)-1)
         Capa_pkg.Propagar(red_neuronal.capas[index_capa])
@@ -97,7 +104,7 @@ end
 """
     CrearRedAleatoria(configuracion::Vector{Int64}, peso_min::Float64, peso_max::Float64)
 
-Crea una red neuronal aleatoria en base a una configuración
+Crea una red neuronal multicapa aleatoria en base a una configuración
 # Arguments:
 - `configuracion::Vector{Int64}`: lista de números enteros que indican el número de neuronas
                                   en cada capa
@@ -139,14 +146,13 @@ function CrearRedAleatoria(configuracion::Vector{Int64}, peso_min::Float64, peso
 end
 
 """
-# TODO: update documentation
-    avanzar_ciclo(red::RedNeuronal, valores_entrada::Vector)
+    Feedforward(red::RedNeuronal, valores_entrada::Vector)
 
 Avanza un ciclo de la red neuronal. Consiste en:
 * Inicializar la capa de entrada a los valores de entrada
-* Disparar todas las neuronas de la red
+* Disparar la capa de entrada
 * Descargar las neuronas de la red (inicialización de valores de entrada a 0)
-* Propagar todas las neuronas de la red
+* Propagar y disparar sucesivamente todas las capas (y sus neuronas) de la red
 
 # Arguments:
 - `red::RedNeuronal`: Red neuronal
@@ -163,11 +169,23 @@ function Feedforward(red::RedNeuronal, valores_entrada::Vector{Float64})
     Propagar_y_Disparar(red)
 end
 
+"""
+    Backpropagation(red::RedNeuronal, clases_verdaderas::Vector, tasa_aprendizaje::Float64)
+
+Actualiza todos los pesos de la red neuronal usando el método de retropropagación
+
+# Arguments:
+- `red::RedNeuronal`: Red neuronal
+- `clases_verdaderas::Vector`: Clases verdaderas de los datos de entrada
+- `tasa_aprendizaje::Float64`: Tasa de aprendizaje
+
+"""
 function Backpropagation(red::RedNeuronal, clases_verdaderas::Vector{Float64},
                          tasa_aprendizaje::Float64)
     capa_salida = last(red.capas)
     deltas = Vector{Float64}()
 
+    # Deltas de la capa de salida
     for i in 1:size(clases_verdaderas, 1)
         delta = clases_verdaderas[i] - capa_salida.neuronas[i].valor_salida
         delta *= Neurona_pkg.DerivadaActivacion(capa_salida.neuronas[i])
@@ -175,7 +193,7 @@ function Backpropagation(red::RedNeuronal, clases_verdaderas::Vector{Float64},
     end
 
     n_capas = size(red.capas, 1)
-
+    # Iteramos las capas de atrás hacia adelante
     for (capa_index, capa) in enumerate(reverse(red.capas[1:n_capas - 1]))
        deltas_capa = Vector{Float64}()
        salidas_capa = []
@@ -192,6 +210,7 @@ function Backpropagation(red::RedNeuronal, clases_verdaderas::Vector{Float64},
             delta = Neurona_pkg.DerivadaActivacion(neurona) * (deltas' * pesos_neurona)
             push!(deltas_capa, delta)
         end
+        # Actualización de pesos de la capa
         delta_pesos = tasa_aprendizaje .* (salidas_capa * deltas')
         for (neurona_index, neurona) in enumerate(capa.neuronas)
             for (conexion_index, conexion) in enumerate(neurona.conexiones)

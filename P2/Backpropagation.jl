@@ -68,7 +68,7 @@ function ECM(valores_reales::Vector{Float64}, prediccion::Vector{Float64})
 end
 
 """
-    predicciones_acc_ECM(red::RedNeuronal, entradas::Vector, salidas::Vector) -> (Vector, Float64, Float64)
+    predicciones_acc_ECM(red::RedNeuronal, entradas::Vector, salidas::Vector) -> (Vector, Float64, Float64, Matrix)
 
 Calcula las predicciones, el accuracy, el error cuadrático medio (ECM) y la matriz de confusión de la red neuronal,
 devolviendo (predicciones, accuracy, ECM, matriz_confusion)
@@ -134,7 +134,7 @@ function main()
 
     # Inicializamos la red
     red = RedNeuronal_pkg.CrearRedAleatoria([num_atributos; red_config; num_clases], -0.5, 0.5)
-    # Normalizamos los datos de entrada
+    # Normalizamos los datos de entrada si procede
     if normalizar
         # La función mean y std esperan un tipo distinto al que procesamos. Lo transformamos con reduce
         media_entrenamiento = mean(reduce(hcat, entradas_entrenamiento)', dims=1)
