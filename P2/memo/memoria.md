@@ -68,13 +68,16 @@ Una vez más, presentamos la matriz de confusión del modelo elegido. En este ca
 
 ### Problema real 5
 
-De nuevo, presentamos los resultados para $2$, $5$ y $10$ neuronas. En este caso, los resultados entre $5$ y $10$ neuronas son muy parejos, aunque parecen muy ligeramente superiores para $10$ neuronas. Por esto, consideramos que el mejor resultado 
+En este caso, presentamos los resultados para $2$, $5$, $10$ y $20$ neuronas. En este caso, los resultados entre $5$ y $10$ neuronas son muy parejos, aunque parecen muy ligeramente superiores para $10$ neuronas. Además, en $20$ neuronas es muy claro el *overfitting*. Por esto, como $10$ es el último mejor resultado y su rendimiento es algo superior, los consideramos como el mejor modelo.
 
 |  LR  | Épocas | Neuronas |                          ECM                           |                          Accuracy                           |
 | :--: | :----: | :------: | :----------------------------------------------------: | :---------------------------------------------------------: |
 | 0.01 |  500   |    2     | ![](problema_real5/ECM_problema_real5_0.01_2_500.png)  | ![](problema_real5/Accuracy_problema_real5_0.01_2_500.png)  |
 | 0.01 |  500   |    5     | ![](problema_real5/ECM_problema_real5_0.01_5_500.png)  | ![](problema_real5/Accuracy_problema_real5_0.01_5_500.png)  |
 | 0.01 |  500   |    10    | ![](problema_real5/ECM_problema_real5_0.01_10_500.png) | ![](problema_real5/Accuracy_problema_real5_0.01_10_500.png) |
+| 0.01 |  500   |    20    | ![](problema_real5/ECM_problema_real5_0.01_20_500.png) | ![](problema_real5/Accuracy_problema_real5_0.01_20_500.png) |
+
+La matriz de confusión para el modelo de $10$ neuronas se presenta a continuación. Observamos como una vez más los falsos positivos superan a los falsos negativos.
 
 |                 Matriz de confusión (train)                  |                  Matriz de confusión (val)                   |
 | :----------------------------------------------------------: | :----------------------------------------------------------: |
@@ -115,25 +118,50 @@ Comprobamos ahora que la normalización es efectiva en el problema $4$. En la si
 
 ### Problema real 6
 
-En primer lugar, tal y como se nos pide en el enunciado, ejecutamos el problema $6$ con la configuración solicitada. Cabe comentar que el tiempo de ejecución fue de **3 horas y 20 minutos**, demostrando la eficiencia de Julia. Los resultados son los siguientes:
+En primer lugar, tal y como se nos pide en el enunciado, ejecutamos el problema $6$ con la configuración solicitada. Cabe comentar que el tiempo de ejecución fue de **3 horas y 20 minutos TODO!!!**, demostrando la eficiencia de Julia. Los resultados son los siguientes:
 
 |  LR  | Épocas | Neuronas |                             ECM                             |                           Accuracy                           |
 | :--: | :----: | :------: | :---------------------------------------------------------: | :----------------------------------------------------------: |
 | 0.1  |  5000  |    20    | ![](problema_real6/ECM_problema_real6_0.1_20_5000_norm.png) | ![](problema_real6/Accuracy_problema_real6_0.1_20_5000_norm.png) |
 
-Además, hemos obtenido las matrices de confusión para esta configuración:
+Observamos cómo, al igual que en el problema $4$, el modelo es capaz de aprender tras normalizar los datos de entradas. Además, hemos obtenido las matrices de confusión para esta configuración:
 
 |                 Matriz de confusión (train)                  |                  Matriz de confusión (val)                   |
 | :----------------------------------------------------------: | :----------------------------------------------------------: |
 | ![](problema_real6/Matriz_problema_real6_0.1_20_5000_norm_train.png) | ![](problema_real6/Matriz_problema_real6_0.1_20_5000_norm_test.png) |
 
+Una vez más, la tendencia de errores es la misma en el conjunto de entrenamiento que en el conjunto de validación. Parece que en este caso, la clase $0$ está sobre-representada, de ahí que haya más falsos negativos.
 
+A continuación, presentamos los resultados para distintas variaciones en el número de neuronas de la configuración que se nos solicitaba con $1000$ épocas. Observamos cómo el rendimiento va creciendo según aumentamos el número de neuronas. ... **TODO: AÑADIR COMENTARIOS DE 30 NEURONAS**.
 
-|  LR  | Épocas | Neuronas  |                             ECM                              |                           Accuracy                           |
-| :--: | :----: | :-------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
-| 0.1  |  1000  |     2     |  ![](problema_real6/ECM_problema_real6_0.1_2_1000_norm.png)  | ![](problema_real6/Accuracy_problema_real6_0.1_2_1000_norm.png) |
-| 0.1  |  1000  |     5     |  ![](problema_real6/ECM_problema_real6_0.1_5_1000_norm.png)  | ![](problema_real6/Accuracy_problema_real6_0.1_5_1000_norm.png) |
-| 0.1  |  1000  |    10     | ![](problema_real6/ECM_problema_real6_0.1_10_1000_norm.png)  | ![](problema_real6/Accuracy_problema_real6_0.1_10_1000_norm.png) |
-| 0.1  |  1000  |    20     | ![](problema_real6/ECM_problema_real6_0.1_20_1000_norm.png)  | ![](problema_real6/Accuracy_problema_real6_0.1_20_1000_norm.png) |
-| 0.1  |  1000  | [10, 10]  | ![](problema_real6/ECM_problema_real6_0.1_10-10_1000_norm.png) | ![](problema_real6/Accuracy_problema_real6_0.1_10-10_1000_norm.png) |
-| 0.1  |  1000  | [5, 5, 5] | ![](problema_real6/ECM_problema_real6_0.1_5-5-5_1000_norm.png) | ![](problema_real6/Accuracy_problema_real6_0.1_5-5-5_1000_norm.png) |
+|  LR  | Épocas | Neuronas |                             ECM                             |                           Accuracy                           |
+| :--: | :----: | :------: | :---------------------------------------------------------: | :----------------------------------------------------------: |
+| 0.1  |  1000  |    2     | ![](problema_real6/ECM_problema_real6_0.1_2_1000_norm.png)  | ![](problema_real6/Accuracy_problema_real6_0.1_2_1000_norm.png) |
+| 0.1  |  1000  |    5     | ![](problema_real6/ECM_problema_real6_0.1_5_1000_norm.png)  | ![](problema_real6/Accuracy_problema_real6_0.1_5_1000_norm.png) |
+| 0.1  |  1000  |    10    | ![](problema_real6/ECM_problema_real6_0.1_10_1000_norm.png) | ![](problema_real6/Accuracy_problema_real6_0.1_10_1000_norm.png) |
+| 0.1  |  1000  |    20    | ![](problema_real6/ECM_problema_real6_0.1_20_1000_norm.png) | ![](problema_real6/Accuracy_problema_real6_0.1_20_1000_norm.png) |
+| 0.1  |  1000  |    30    | ![](problema_real6/ECM_problema_real6_0.1_30_1000_norm.png) | ![](problema_real6/Accuracy_problema_real6_0.1_30_1000_norm.png) |
+
+Como es evidente que este es el problema más desafiante de todos, hemos decidido probar la funcionalidad de varias capas sobre este conjunto de datos. Los resultados se muestran en la siguiente tabla:
+
+|  LR  | Épocas |  Neuronas  |                             ECM                              |                           Accuracy                           |
+| :--: | :----: | :--------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
+| 0.1  |  1000  |  [10, 10]  | ![](problema_real6/ECM_problema_real6_0.1_10-10_1000_norm.png) | ![](problema_real6/Accuracy_problema_real6_0.1_10-10_1000_norm.png) |
+| 0.1  |  1000  | [5, 5, 5]  | ![](problema_real6/ECM_problema_real6_0.1_5-5-5_1000_norm.png) | ![](problema_real6/Accuracy_problema_real6_0.1_5-5-5_1000_norm.png) |
+| 0.1  |  1000  | [5, 10, 5] | ![](problema_real6/ECM_problema_real6_0.1_5-10-5_1000_norm.png) | ![](problema_real6/Accuracy_problema_real6_0.1_5-10-5_1000_norm.png) |
+
+Con dos capas ocultas de $10$ neuronas cada una, el rendimiento es similar al de una sola capa. Sin embargo, si añadimos una tercera capa oculta, la complejidad del modelo es tal que parece impedir que se aproveche el mayor número de parámetros para un mejor aprendizaje.
+
+Por último, como en las pruebas realizadas con los otros problemas el LR fijado a $0.01$ parecía tener un rendimiento superior, hemos decidido hacer probar a modificar este parámetro en la configuración solicitada.
+
+|  LR  | Épocas | Neuronas |                             ECM                              |                           Accuracy                           |
+| :--: | :----: | :------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
+| 0.01 |  1000  |    20    | ![](problema_real6/ECM_problema_real6_0.01_20_1000_norm.png) | ![](problema_real6/Accuracy_problema_real6_0.01_20_1000_norm.png) |
+
+Para $1000$ épocas el rendimiento es muy superior al de la configuración solicitada, por lo que hemos decidido ejecutarlo para $5000$ épocas. Estos resultados, una vez más muy superiores, se muestran a contunuación:
+
+|  LR  | Épocas | Neuronas |                             ECM                              |                           Accuracy                           |
+| :--: | :----: | :------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
+| 0.01 |  5000  |    20    | ![](problema_real6/ECM_problema_real6_0.01_20_5000_norm.png) | ![](problema_real6/Accuracy_problema_real6_0.01_20_5000_norm.png) |
+
+**TODO: añadir más comentarios si procede. **
