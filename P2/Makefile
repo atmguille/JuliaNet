@@ -1,23 +1,11 @@
 compilar:
 	julia -e 'using Pkg; Pkg.add("ArgParse")'
 
-compila_mp:
-	make compilar
+ayuda_retro:
+	julia Backpropagation.jl -h
 
-ayuda_mp:
-	julia FrioCalor.jl -h
+ejecuta_problema_real2:
+	julia Backpropagation.jl --input_file data\problema_real2.txt --output_name problema_real2_0.01_10_500 --tasa_aprendizaje 0.01 --epocas 500 --modo 1 --red_config [10] --porcentaje 0.7
 
-ejecuta_mp:
-	julia FrioCalor.jl --input_file input_mp.txt --output_file output_mp.txt 
-
-ayuda_perceptron:
-	julia Perceptron.jl -h
-
-ejecuta_perceptron:
-	julia Perceptron.jl --input_file problema_real1.txt --output_file prediccion_perceptron_prob1.txt --umbral 0.2 --tasa_aprendizaje 0.025 --max_epocas 50 --modo 1 --porcentaje 0.8
-
-ayuda_adaline:
-	julia Adaline.jl -h
-
-ejecuta_adaline:
-	julia Adaline.jl --input_file problema_real1.txt --output_file prediccion_adaline_prob1.txt --tasa_aprendizaje 0.04 --max_epocas 50 --tolerancia 0.02 --modo 1 --porcentaje 0.8
+ejecuta_problema_real6:
+	julia Backpropagation.jl --input_file data\problema_real6.txt --output_name problema_real6_0.1_20_5000_norm --tasa_aprendizaje 0.1 --epocas 5000 --modo 1 --red_config [20] --porcentaje 0.7 --normalizar
