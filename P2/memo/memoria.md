@@ -4,23 +4,25 @@ Autores: Guillermo García Cobo y Álvaro Zaera de la Fuente
 
 ## 1. Algoritmo de retropropagación
 
-Para implementar el perceptrón multicapa hemos utilizado la librería de la práctica anterior que se encuentra en los paquetes `Capa_pkg.jl`, `Neurona_pkg.jl` y `RedNeuronal_pkg.jl`. A este último paquete le hemos añadido la funcionalidad necesaria para crear un perceptrón multicapa con pesos aleatorios y número de capas ocultas y neuronas completamente configurable. También, ese fichero incluye las funciones necesarias para que la red procese una entrada (`Feedforward`) y para retropropagar la salida obtenida ajustando los pesos (`Backpropagation`). Es decir, soportamos funcionalidad para aplicar el algoritmo de retropropagación en perceptrones con **varias capas ocultas**.
+Para implementar el perceptrón multicapa hemos utilizado la librería de la práctica anterior que se encuentra en los paquetes `Capa_pkg.jl`, `Neurona_pkg.jl` y `RedNeuronal_pkg.jl`. A este último paquete le hemos añadido la funcionalidad necesaria para crear un perceptrón multicapa con pesos aleatorios que tenga el número de capas ocultas y neuronas completamente configurable. También, ese fichero incluye las funciones necesarias para que la red procese una entrada (`Feedforward`) y para retropropagar la salida obtenida ajustando los pesos (`Backpropagation`). Es decir, soportamos funcionalidad para aplicar el algoritmo de retropropagación en perceptrones con **varias capas ocultas**.
 
-La función de `Feedforward` recibe un vector con los valores de entrada para la red y realiza las llamadas necesarias a las funciones de `Inicializar`, `Propagar` y `Disparar` para procesar la entrada y colocar los valores de salida en las neuronas de la última capa.
+La función de `Feedforward` recibe un vector con los valores de entrada para la red y realiza las sucesivas llamadas necesarias a las funciones de `Inicializar`, `Propagar` y `Disparar` para procesar la entrada y colocar los valores de salida en las neuronas de la última capa.
 
-La función de `Backpropagation` asume que se ha realizado la llamada a la función anterior y ajusta los pesos de todas las neuronas teniendo en cuenta la diferencia entre los valores obtenidos como salida del perceptrón y la clase real de esa entrada. Para ello, calculamos primero el error $\delta_k$ en la salida de cada clase $k$ de la siguiente manera: $\delta_k = (t_k-y_k) f'(y\_in_k)$. 
+La función de `Backpropagation` asume que se ha realizado la llamada a la función anterior y ajusta los pesos de todas las neuronas teniendo en cuenta la diferencia entre los valores obtenidos en la salida del perceptrón y la clase real de esa entrada. Para ello, calculamos primero el error $\delta_k$ en la salida de cada clase $k$ de la siguiente manera: $\delta_k = (t_k-y_k) f'(y\_in_k)$. 
 
 En esa fórmula, $t_k$ es el valor real de la clase $k$ (en esta práctica es 1 si la entrada pertenece a esa clase y -1 si no), $y_k$ es la salida del perceptrón en la neurona de la última capa asociada a la clase $k$ e $y\_in_k$ es el valor de entrada de esa neurona antes de aplicar la función de activación $f.$ La nueva función de activación sigmoidal y la funcionalidad para aplicar su derivada se ha añadido al paquete `Neurona_pkg.jl`. Todos los $\delta_k$ calculados de esa manera se almacenan en un vector $\mathbf{\delta}.$
 
-Una vez calculado el error $\mathbf{\delta}$ de la última capa, se propaga utilizando un bucle por todas las capas ocultas. En cada capa, iteramos por todas las neuronas y, para cada neurona $i$ (con entrada $z\_in_i$), obtenemos el vector de pesos $\textbf{w}$ de las conexiones que parten de esa neurona. Hallamos el error de esa capa mediante la fórmula $\delta_i=f'(z\_in_i) \cdot \mathbf{\delta}^T \cdot \mathbf{w}.$
+Una vez calculado el error $\mathbf{\delta}$ de la última capa, se propaga hacia detrás utilizando un bucle por todas las capas ocultas. En cada capa, iteramos por todas las neuronas y, para cada neurona $i$ (con entrada $z\_in_i$), obtenemos el vector de pesos $\textbf{w}$ de las conexiones que parten de esa neurona. Hallamos el error de esa capa mediante la fórmula $\delta_i=f'(z\_in_i) \cdot \mathbf{\delta}^T \cdot \mathbf{w}.$
 
-Todos esos errores se almacenan en un vector $\mathbf{\delta_{capa}}$ que se utilizará para calcular la corrección de pesos de la siguiente capa. Además, aprovechando ese bucle, obtenemos un vector $\bold{z}$ con las salidas de todas las neuronas de esa capa.
+Todos esos errores se almacenan en un vector $\mathbf{\delta_{capa}}$ que se utilizará para calcular la corrección de pesos de la siguiente capa procesada (la capa anterior de la red). Además, aprovechando ese bucle, obtenemos un vector $\bold{z}$ con las salidas de todas las neuronas de esa capa.
 
 Después, se calcula la matriz de corrección de pesos de la capa $\Delta = \alpha \cdot \mathbf{z} \cdot \mathbf{\delta}^T$ (donde $\alpha$ es la tasa de aprendizaje) y se realiza el ajuste de los pesos. Para ello, se suma al peso de la conexión entre la neurona $i$ de la capa con la neurona $j$ de la siguiente, el valor que se encuentra en la fila $i$ y columna $j$ de $\Delta$. Por último, se sustituye el vector de errores $\mathbf{\delta} = \mathbf{\delta_{capa}}$ para poder repetir el proceso de manera correcta en el resto de capas ocultas.
 
-Este algoritmo actualiza los pesos con el objetivo de minimizar el error cuadrático medio (debido a la regla de la cadena) y se ha descrito tal y como se ha implementado. Nuestro objetivo ha sido el de implementar el algoritmo de la manera más eficiente posible partiendo de la librería utilizada, realizando el ajuste de pesos durante el algoritmo en lugar de al final (sin que esto afecte al correcto funcionamiento) y aprovechando todos los bucles para obtener la mayor información posible que sea necesaria.
+Este algoritmo actualiza los pesos con el objetivo de minimizar el error cuadrático medio (debido a la regla de la cadena) y se ha descrito tal y como se ha implementado. Nuestro objetivo ha sido el de implementar el algoritmo de la manera más eficiente posible partiendo de la librería utilizada, realizando el ajuste de pesos durante el algoritmo en lugar de al final (sin que esto afecte al correcto funcionamiento), aprovechando todos los bucles para obtener la mayor información posible que sea necesaria y sacando partido al buen rendimiento que ofrece Julia en sus multiplicaciones de vectores y matrices.
 
 El proceso de entrenamiento completo se realiza en el fichero `Backpropagation.jl` que, para cada entrada de entrenamiento, aplica la función de `Feedforward` para obtener la salida que predice el perceptrón y posteriormente, realiza la retropropagación utilizando la clase a la que pertenecen los datos y la tasa de aprendizaje indicada como parámetro. Este proceso se repite para el número de épocas indicado y, para cada época, se calcula y se muestra por pantalla la matriz de confusión, el error cuadrático medio (ECM) y la tasa de aciertos (Accuracy) para los conjuntos de entrenamiento y validación.  Además, la predicción final del percetrón sobre el conjunto de validación y la evolución de los valores del ECM y Accuracy se vuelcan a ficheros de texto al finalizar la ejecución.
+
+
 
 ## 2. Problemas reales
 
@@ -99,6 +101,8 @@ La matriz de confusión para el modelo de $10$ neuronas se presenta a continuaci
 | :----------------------------------------------------------: | :----------------------------------------------------------: |
 | ![](problema_real5/Matriz_problema_real5_0.01_10_500_train.png) | ![](problema_real5/Matriz_problema_real5_0.01_10_500_test.png) |
 
+<div style="page-break-after: always; break-after: page;"></div>
+
 ## 3. Problemas reales y normalización
 
 Como se indica en el enunciado, para los problemas $4$ y $6$ no es posible encontrar una configuración que dé buenos resultados. A continuación mostramos los resultados de rendimiento para una de las configuraciones que hemos probado:
@@ -166,7 +170,7 @@ Como es evidente que este es el problema más desafiante de todos, hemos decidid
 | 0.1  |  1000  | [5, 5, 5]  | ![](problema_real6/ECM_problema_real6_0.1_5-5-5_1000_norm.png) | ![](problema_real6/Accuracy_problema_real6_0.1_5-5-5_1000_norm.png) |
 | 0.1  |  1000  | [5, 10, 5] | ![](problema_real6/ECM_problema_real6_0.1_5-10-5_1000_norm.png) | ![](problema_real6/Accuracy_problema_real6_0.1_5-10-5_1000_norm.png) |
 
-Con dos capas ocultas de $10$ neuronas cada una, el rendimiento es similar al de una sola capa. Sin embargo, si añadimos una tercera capa oculta, la complejidad del modelo es tal que parece impedir que se aproveche el mayor número de parámetros para un mejor aprendizaje. También es reseñable destacar, combinando estos resultados con los de 20 y 30 neuronas, que estos modelos con mayor complejidad tienen una variabilidad mayor a la hora de entrenar, con subidas y bajadas del ECM y Accuracy.
+Con dos capas ocultas de $10$ neuronas cada una, el rendimiento es similar al de una sola capa. Sin embargo, si añadimos una tercera capa oculta, la complejidad del modelo es tal que parece impedir que se aproveche el mayor número de parámetros para un mejor aprendizaje. También es reseñable destacar, combinando estos resultados con los de $20$ y $30$ neuronas, que estos modelos con mayor complejidad tienen una variabilidad mayor a la hora de entrenar, con subidas y bajadas del ECM y Accuracy.
 
 Por último, como en las pruebas realizadas con los otros problemas el LR fijado a $0.01$ parecía tener un rendimiento superior, hemos decidido hacer probar a modificar este parámetro en la configuración solicitada.
 
