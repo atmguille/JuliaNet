@@ -21,7 +21,7 @@ function parse_commandline()
             help = "File with input values to train and test the network (modes 1 and 2). In mode 3, it is only the training file."
             required = true
         "--output_name"
-            help = "Base name for the output files in which the predictions, ecm and hit rate are to be stored."
+            help = "Base name for the output files in which the predictions, mse and hit rate are to be stored."
             required = true
         "--learning_rate"
             help = "Learning rate of the multilayer perceptron."
@@ -55,7 +55,7 @@ function parse_commandline()
 end
 
 """
-    ECM(target::Vector, prediction::Vector)
+    MSE(target::Vector, prediction::Vector)
 
 Computes the mean square error (MSE) between the target and the prediction.
 # Arguments:
@@ -63,28 +63,28 @@ Computes the mean square error (MSE) between the target and the prediction.
 - `prediction::Vector`: Prediction
 
 """
-function ECM(target::Vector{Float64}, prediction::Vector{Float64})
+function MSE(target::Vector{Float64}, prediction::Vector{Float64})
     return sum(map((x) -> x^2, prediction-target)) / size(prediction, 1)
 end
 
 """
-    predictions_acc_ECM(network::NeuralNetwork, inputs::Vector, outputs::Vector) -> (Vector, Float64, Float64)
+    predictions_acc_MSE(network::NeuralNetwork, inputs::Vector, outputs::Vector) -> (Vector, Float64, Float64)
 
 Computes the predictions, the accuracy, the mean square error (MSE) and the confusion matrix of the neural network,
-returning (predictions, accuracy, ECM, confusion_matrix).
+returning (predictions, accuracy, MSE, confusion_matrix).
 # Arguments:
 - `network::NeuralNetwork`: Neural network.
 - `inputs::Vector`: Input values of the network
 - `outputs::Vector`: Expected network output values
 
 """
-function predictions_acc_ECM(network::NeuralNetwork_pkg.NeuralNetwork, inputs::Vector{Vector{Float64}},
+function predictions_acc_MSE(network::NeuralNetwork_pkg.NeuralNetwork, inputs::Vector{Vector{Float64}},
                               outputs::Vector{Vector{Float64}})
     predictions = []
     n_inputs = size(inputs, 1)
     n_classes = size(outputs[1], 1)
     prediction_class = repeat([-1.], n_classes)
-    ecm = 0
+    mse = 0
     confusion_matrix = zeros(Int64, (n_classes, n_classes))
 
     for i in 1:n_inputs
@@ -92,7 +92,7 @@ function predictions_acc_ECM(network::NeuralNetwork_pkg.NeuralNetwork, inputs::V
         classes = outputs[i]
         NeuralNetwork_pkg.Feedforward(network, attributes)
         prediction = [neuron.output_value for neuron in last(network.layers).neurons]
-        ecm += ECM(classes, prediction)
+        mse += MSE(classes, prediction)
         _, index_actual = findmax(classes)
         # The predicted class is the neuron that has been activated the most.
         _, index_pred = findmax(prediction)
@@ -101,10 +101,10 @@ function predictions_acc_ECM(network::NeuralNetwork_pkg.NeuralNetwork, inputs::V
         push!(predictions, copy(prediction_class))
         prediction_class[index_pred] = -1.
     end
-    ecm /= n_inputs
+    mse /= n_inputs
     acc = sum(confusion_matrix[i, i] for i in 1:size(confusion_matrix, 1)) / n_inputs
 
-    return predictions, acc, ecm, confusion_matrix
+    return predictions, acc, mse, confusion_matrix
 end
 
 
@@ -147,9 +147,9 @@ function main()
     end
 
     #array_preds_test = []
-    array_ecm_train = []
+    array_mse_train = []
     array_acc_train = []
-    array_ecm_test = []
+    array_mse_test = []
     array_acc_test = []
 
     for epoch in 1:epochs
@@ -161,22 +161,22 @@ function main()
             NeuralNetwork_pkg.Backpropagation(network, classes, learning_rate)
         end
 
-        _, acc_train, ecm_train, conf_mat_train = predictions_acc_ECM(network, inputs_training, outputs_training)
-        predictions_test, acc_test, ecm_test, conf_mat_test = predictions_acc_ECM(network, inputs_test, outputs_test)
+        _, acc_train, mse_train, conf_mat_train = predictions_acc_MSE(network, inputs_training, outputs_training)
+        predictions_test, acc_test, mse_test, conf_mat_test = predictions_acc_MSE(network, inputs_test, outputs_test)
         println("Epoch ", epoch)
-        println("ECM Train: ", ecm_train, " ECM Test: ", ecm_test)
+        println("MSE Train: ", mse_train, " MSE Test: ", mse_test)
         println("Accuracy Train: ", acc_train, " Accuracy Test: ", acc_test)
         println("Confusion Train Array: ", conf_mat_train, " Confusion Test Array: ", conf_mat_test)
         #push!(array_preds_test, predictions_test)
-        push!(array_ecm_train, ecm_train)
-        push!(array_ecm_test, ecm_test)
+        push!(array_mse_train, mse_train)
+        push!(array_mse_test, mse_test)
         push!(array_acc_train, acc_train)
         push!(array_acc_test, acc_test)
     end
 
     #writedlm(output_name * "_pred_test.txt", array_preds_test)
-    writedlm(output_name * "_ecm_train.txt", array_ecm_train)
-    writedlm(output_name * "_ecm_test.txt", array_ecm_test)
+    writedlm(output_name * "_mse_train.txt", array_mse_train)
+    writedlm(output_name * "_mse_test.txt", array_mse_test)
     writedlm(output_name * "_acc_train.txt", array_acc_train)
     writedlm(output_name * "_acc_test.txt", array_acc_test)
 
